@@ -5,47 +5,46 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Denrées du Patidou</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1e0808">
+<meta name="theme-color" content="#d4c4a0">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=UnifrakturMaguntia&display=swap">
 <style>
 :root {
-  --bg-deep:      #0f0303;
-  --bg-base:      #1e0808;
-  --bg-surface:   #2d0f0f;
-  --bg-raised:    #3d1515;
-  --bg-hover:     #4a1c1c;
-  --gold:         #c9a84c;
-  --gold-light:   #e8c96d;
-  --gold-dim:     #7a5e1a;
-  --gold-border:  #5a3e0e;
+  --bg-deep:      #d4c4a0;
+  --bg-base:      #ede0c4;
+  --bg-surface:   #fdf8ef;
+  --bg-raised:    #f5ead8;
+  --bg-hover:     #e8d8b8;
+  --gold:         #8b6010;
+  --gold-light:   #c9a84c;
+  --gold-dim:     #a07828;
+  --gold-border:  #c9a84c;
   --crimson:      #8b1515;
   --crimson-light:#c02828;
-  --parchment:    #f5e6c8;
-  --parchment-dim:#c8a87a;
-  --parchment-muted:#8c6a3a;
-  --ok:           #1e4d1e;
+  --parchment:    #1a0808;
+  --parchment-dim:#4a2010;
+  --parchment-muted:#9b6030;
+  --ok:           #daf0da;
   --ok-bar:       #2e7a2e;
-  --ok-text:      #6dbd6d;
-  --low:          #5a3a08;
+  --ok-text:      #1a5a1a;
+  --low:          #fff0c0;
   --low-bar:      #a06010;
-  --low-text:     #f0a830;
-  --critical:     #5a0e0e;
-  --critical-bar: #a01818;
-  --critical-text:#f04040;
-  --depleted-bg:  #3a0808;
-  --depleted-text:#e03030;
-  --shadow:       0 4px 24px rgba(0,0,0,0.7);
+  --low-text:     #7a4800;
+  --critical:     #fce8e8;
+  --critical-bar: #c01818;
+  --critical-text:#8b0808;
+  --depleted-bg:  #fae0e0;
+  --depleted-text:#8b0000;
+  --shadow:       0 2px 12px rgba(100,60,10,0.15);
   --radius:       10px;
   --radius-sm:    6px;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
-  height: 100%; width: 100%;
-  overflow: hidden;
+  height: 100%; width: 100%; overflow: hidden;
   background: var(--bg-deep);
   color: var(--parchment);
   font-family: 'Crimson Text', 'Palatino Linotype', Georgia, serif;
@@ -57,15 +56,27 @@ html, body {
   height: 100dvh; width: 100%;
   max-width: 520px; margin: 0 auto;
   background: var(--bg-base);
-  position: relative;
-  overflow: hidden;
+  position: relative; overflow: hidden;
+}
+
+/* ── ENLUMINURE : première lettre gothique ── */
+.zone-name::first-letter,
+.subzone-name::first-letter,
+.item-name::first-letter,
+.shopping-item-name::first-letter,
+.modal-title::first-letter {
+  font-family: 'UnifrakturMaguntia', cursive;
+  font-size: 1.55em;
+  color: var(--crimson);
+  line-height: 0.85;
+  text-shadow: 1px 1px 0 rgba(201,168,76,0.45);
 }
 
 /* ── HEADER ── */
 .header {
   flex-shrink: 0;
   background: var(--bg-deep);
-  border-bottom: 2px solid var(--gold-dim);
+  border-bottom: 2px solid var(--gold-border);
   padding: 12px 16px 10px;
   display: flex; align-items: center; justify-content: space-between;
   position: relative;
@@ -73,63 +84,55 @@ html, body {
 .header::after {
   content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
   width: 60%; height: 3px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  background: linear-gradient(90deg, transparent, var(--gold-light), transparent);
   border-radius: 2px;
 }
 .header-left { display: flex; align-items: center; gap: 10px; flex: 1; }
 .back-btn {
-  background: none; border: 1px solid var(--gold-dim); border-radius: var(--radius-sm);
+  background: none; border: 1px solid var(--gold-border); border-radius: var(--radius-sm);
   color: var(--gold); font-size: 18px; width: 36px; height: 36px;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.back-btn:active { background: var(--bg-raised); }
+.back-btn:active { background: var(--bg-hover); }
 .header-title {
   font-family: 'Cinzel', Georgia, serif;
   font-size: 15px; font-weight: 700;
-  color: var(--gold-light);
-  letter-spacing: 0.05em;
-  line-height: 1.2;
-  flex: 1;
+  color: var(--parchment);
+  letter-spacing: 0.05em; line-height: 1.2; flex: 1;
 }
 .header-subtitle {
   font-family: 'Crimson Text', serif;
-  font-size: 12px; color: var(--parchment-muted);
-  letter-spacing: 0.03em;
+  font-size: 12px; color: var(--parchment-muted); letter-spacing: 0.03em;
 }
 .header-actions { display: flex; gap: 8px; align-items: center; }
 .icon-btn {
-  background: none; border: 1px solid var(--gold-dim); border-radius: var(--radius-sm);
+  background: none; border: 1px solid var(--gold-border); border-radius: var(--radius-sm);
   color: var(--gold); font-size: 16px; width: 36px; height: 36px;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
 }
-.icon-btn:active { background: var(--bg-raised); }
-.sync-status {
-  font-size: 10px; color: var(--parchment-muted);
-  text-align: center; line-height: 1;
-}
+.icon-btn:active { background: var(--bg-hover); }
+.sync-status { font-size: 10px; color: var(--parchment-muted); text-align: center; line-height: 1; }
 .sync-status.syncing { color: var(--gold); animation: pulse 1s infinite; }
-.sync-status.error { color: var(--critical-text); }
-.sync-status.ok { color: var(--ok-text); }
+.sync-status.error   { color: var(--critical-text); }
+.sync-status.ok      { color: var(--ok-text); }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
 /* ── SCROLL AREA ── */
 .content {
   flex: 1; overflow-y: auto; overflow-x: hidden;
-  padding: 16px;
+  padding: 16px; position: relative;
   scrollbar-width: thin;
-  scrollbar-color: var(--gold-dim) var(--bg-surface);
+  scrollbar-color: var(--gold-border) var(--bg-raised);
 }
 .content::-webkit-scrollbar { width: 4px; }
-.content::-webkit-scrollbar-track { background: var(--bg-surface); }
-.content::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+.content::-webkit-scrollbar-track { background: var(--bg-raised); }
+.content::-webkit-scrollbar-thumb { background: var(--gold-border); border-radius: 2px; }
 
 /* ── BOTTOM NAV ── */
 .bottom-nav {
-  flex-shrink: 0;
-  display: flex;
+  flex-shrink: 0; display: flex;
   background: var(--bg-deep);
-  border-top: 2px solid var(--gold-dim);
+  border-top: 2px solid var(--gold-border);
   padding-bottom: env(safe-area-inset-bottom, 0);
 }
 .nav-btn {
@@ -141,14 +144,11 @@ html, body {
   transition: color 0.2s;
 }
 .nav-btn .nav-icon { font-size: 20px; }
-.nav-btn.active { color: var(--gold-light); }
-.nav-btn.active .nav-icon { filter: drop-shadow(0 0 6px rgba(201,168,76,0.6)); }
+.nav-btn.active { color: var(--crimson); }
+.nav-btn.active .nav-icon { filter: drop-shadow(0 0 4px rgba(139,21,21,0.4)); }
 
 /* ── ZONE GRID ── */
-.zones-grid {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
+.zones-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .zone-card {
   background: var(--bg-surface);
   border: 1px solid var(--gold-border);
@@ -158,29 +158,21 @@ html, body {
   display: flex; flex-direction: column; align-items: center; gap: 8px;
   position: relative; overflow: hidden;
   transition: border-color 0.2s, background 0.2s;
+  box-shadow: var(--shadow);
 }
-.zone-card:active { background: var(--bg-hover); border-color: var(--gold-dim); }
+.zone-card:active { background: var(--bg-hover); border-color: var(--gold); }
 .zone-card::before {
   content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  background: linear-gradient(90deg, transparent, var(--gold-border), transparent);
 }
 .zone-icon { font-size: 32px; line-height: 1; }
 .zone-name {
   font-family: 'Cinzel', serif; font-size: 12px; font-weight: 600;
   color: var(--parchment); text-align: center; letter-spacing: 0.04em;
 }
-.zone-stats {
-  font-size: 11px; color: var(--parchment-muted);
-  text-align: center;
-}
-.zone-health {
-  width: 100%; height: 4px; background: var(--bg-raised);
-  border-radius: 2px; overflow: hidden;
-}
-.zone-health-bar {
-  height: 100%; border-radius: 2px;
-  transition: width 0.4s ease;
-}
+.zone-stats { font-size: 11px; color: var(--parchment-muted); text-align: center; }
+.zone-health { width: 100%; height: 4px; background: var(--bg-raised); border-radius: 2px; overflow: hidden; }
+.zone-health-bar { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
 .zone-alert-badge {
   position: absolute; top: 8px; right: 8px;
   background: var(--critical-bar); color: #fff;
@@ -195,6 +187,7 @@ html, body {
   background: var(--bg-surface); border: 1px solid var(--gold-border);
   border-radius: var(--radius); padding: 14px 16px;
   cursor: pointer; display: flex; align-items: center; gap: 14px;
+  box-shadow: var(--shadow); position: relative; overflow: hidden;
   transition: background 0.2s;
 }
 .subzone-card:active { background: var(--bg-hover); }
@@ -205,33 +198,22 @@ html, body {
 }
 .subzone-count { font-size: 12px; color: var(--parchment-muted); margin-top: 2px; }
 .subzone-health { width: 80px; }
-.subzone-health-bar-bg {
-  width: 100%; height: 6px; background: var(--bg-raised); border-radius: 3px; overflow: hidden;
-}
+.subzone-health-bar-bg { width: 100%; height: 6px; background: var(--bg-raised); border-radius: 3px; overflow: hidden; }
 .subzone-health-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }
 .subzone-health-label { font-size: 10px; color: var(--parchment-muted); text-align: right; margin-top: 2px; }
 .subzone-arrow { color: var(--gold-dim); font-size: 16px; }
 .subzone-alert { color: var(--critical-text); font-size: 13px; }
 
-/* ── ITEM LIST ── */
-.items-section-title {
-  font-family: 'Cinzel', serif; font-size: 12px; color: var(--gold-dim);
-  letter-spacing: 0.1em; text-transform: uppercase;
-  margin-bottom: 10px; padding-bottom: 4px;
-  border-bottom: 1px solid var(--gold-border);
-}
+/* ── ITEMS ── */
 .item-list { display: flex; flex-direction: column; gap: 8px; }
 .item-card {
   background: var(--bg-surface); border: 1px solid var(--gold-border);
   border-radius: var(--radius); padding: 12px 14px;
-  cursor: pointer; transition: background 0.2s;
-  position: relative; overflow: hidden;
+  cursor: pointer; box-shadow: var(--shadow); position: relative; overflow: hidden;
+  transition: background 0.2s;
 }
 .item-card:active { background: var(--bg-hover); }
-.item-card.depleted {
-  background: var(--depleted-bg); border-color: var(--critical-bar);
-  opacity: 0.85;
-}
+.item-card.depleted { background: var(--depleted-bg); border-color: var(--critical-bar); }
 .item-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
 .item-name {
   font-family: 'Cinzel', serif; font-size: 13px; font-weight: 600;
@@ -243,72 +225,52 @@ html, body {
   padding: 2px 7px; border-radius: 10px; flex-shrink: 0;
   font-style: italic; letter-spacing: 0.02em;
 }
-.badge-ok      { background: var(--ok);       color: var(--ok-text); }
-.badge-low     { background: var(--low);      color: var(--low-text); }
-.badge-critical{ background: var(--critical); color: var(--critical-text); }
-.badge-depleted{ background: var(--critical); color: var(--depleted-text); font-weight: bold; }
-
-.item-qty {
-  font-size: 12px; color: var(--parchment-dim); margin: 4px 0 8px;
-}
-.item-bar-bg {
-  width: 100%; height: 6px; background: var(--bg-raised); border-radius: 3px; overflow: hidden;
-}
+.badge-ok       { background: var(--ok);       color: var(--ok-text); }
+.badge-low      { background: var(--low);       color: var(--low-text); }
+.badge-critical { background: var(--critical);  color: var(--critical-text); }
+.badge-depleted { background: var(--depleted-bg); color: var(--depleted-text); font-weight: bold; }
+.item-qty { font-size: 12px; color: var(--parchment-muted); margin: 4px 0 8px; }
+.item-bar-bg { width: 100%; height: 6px; background: var(--bg-raised); border-radius: 3px; overflow: hidden; }
 .item-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }
-.item-bar-labels {
-  display: flex; justify-content: space-between;
-  font-size: 10px; color: var(--parchment-muted); margin-top: 3px;
-}
+.item-bar-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--parchment-muted); margin-top: 3px; }
 .bar-ok       { background: linear-gradient(90deg, var(--ok-bar), #4dbd4d); }
 .bar-low      { background: linear-gradient(90deg, var(--low-bar), #d08020); }
 .bar-critical { background: linear-gradient(90deg, var(--critical-bar), #d03030); }
-.bar-depleted { background: #5a0e0e; width: 0% !important; }
 
 /* ── FAB ── */
 .fab {
   position: absolute; bottom: 80px; right: 20px;
   width: 52px; height: 52px; border-radius: 50%;
   background: linear-gradient(135deg, var(--crimson-light), var(--crimson));
-  border: 2px solid var(--gold);
+  border: 2px solid var(--gold-border);
   color: var(--gold-light); font-size: 24px;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.6), 0 0 12px rgba(201,168,76,0.2);
-  z-index: 10;
-  transition: transform 0.1s;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2), 0 0 10px rgba(201,168,76,0.3);
+  z-index: 10; transition: transform 0.1s;
 }
 .fab:active { transform: scale(0.93); }
 
 /* ── SHOPPING LIST ── */
-.shopping-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 16px;
-}
-.shopping-title {
-  font-family: 'Cinzel', serif; font-size: 16px; font-weight: 700;
-  color: var(--gold-light);
-}
+.shopping-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.shopping-title { font-family: 'Cinzel', serif; font-size: 16px; font-weight: 700; color: var(--parchment); }
 .shopping-clear-btn {
   background: none; border: 1px solid var(--gold-border);
   color: var(--parchment-muted); font-family: 'Crimson Text', serif;
-  font-size: 13px; padding: 4px 10px; border-radius: var(--radius-sm);
-  cursor: pointer;
+  font-size: 13px; padding: 4px 10px; border-radius: var(--radius-sm); cursor: pointer;
 }
 .shopping-item {
   background: var(--bg-surface); border: 1px solid var(--gold-border);
   border-radius: var(--radius); padding: 12px 14px; margin-bottom: 8px;
   display: flex; align-items: center; gap: 12px;
-  cursor: pointer; transition: background 0.2s;
+  cursor: pointer; box-shadow: var(--shadow); transition: background 0.2s;
 }
-.shopping-item.checked {
-  opacity: 0.5;
-  text-decoration: line-through;
-}
+.shopping-item.checked { opacity: 0.5; text-decoration: line-through; }
 .shopping-item:active { background: var(--bg-hover); }
 .shopping-checkbox {
   width: 22px; height: 22px; border-radius: 4px;
-  border: 2px solid var(--gold-dim); background: var(--bg-raised);
+  border: 2px solid var(--gold-border); background: var(--bg-raised);
   display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; font-size: 13px; color: var(--gold);
+  flex-shrink: 0; font-size: 13px; color: var(--ok-text);
 }
 .shopping-item.checked .shopping-checkbox { background: var(--ok); border-color: var(--ok-bar); }
 .shopping-item-info { flex: 1; }
@@ -327,42 +289,36 @@ html, body {
   width: 100%; background: var(--bg-surface); border: 1px dashed var(--gold-border);
   border-radius: var(--radius); padding: 12px;
   color: var(--parchment-muted); font-family: 'Crimson Text', serif; font-size: 14px;
-  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-  margin-top: 4px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 4px;
 }
 .shopping-add-btn:active { background: var(--bg-hover); }
-.shopping-empty {
-  text-align: center; padding: 40px 20px;
-  color: var(--parchment-muted); font-style: italic; font-size: 15px;
-}
+.shopping-empty { text-align: center; padding: 40px 20px; color: var(--parchment-muted); font-style: italic; font-size: 15px; }
 .shopping-empty .empty-icon { font-size: 40px; display: block; margin-bottom: 12px; }
 
 /* ── MODAL ── */
 .modal-overlay {
   position: absolute; inset: 0; z-index: 100;
-  background: rgba(0,0,0,0.75);
+  background: rgba(60,20,5,0.55);
   display: flex; align-items: flex-end; justify-content: center;
   padding-bottom: env(safe-area-inset-bottom, 0);
 }
 .modal-overlay.center { align-items: center; padding: 16px; }
 .modal {
   background: var(--bg-surface);
-  border: 1px solid var(--gold-dim);
+  border: 1px solid var(--gold-border);
   border-radius: var(--radius) var(--radius) 0 0;
-  width: 100%; max-height: 92dvh;
-  overflow-y: auto;
-  box-shadow: var(--shadow), 0 0 30px rgba(201,168,76,0.1);
+  width: 100%; max-height: 92dvh; overflow-y: auto;
+  box-shadow: 0 -4px 30px rgba(100,60,10,0.2);
 }
 .modal-overlay.center .modal { border-radius: var(--radius); max-width: 420px; }
 .modal-header {
-  padding: 18px 18px 14px;
-  border-bottom: 1px solid var(--gold-border);
+  padding: 18px 18px 14px; border-bottom: 1px solid var(--gold-border);
   display: flex; align-items: center; justify-content: space-between;
   position: sticky; top: 0; background: var(--bg-surface); z-index: 1;
 }
 .modal-title {
   font-family: 'Cinzel', serif; font-size: 15px; font-weight: 700;
-  color: var(--gold-light); letter-spacing: 0.04em;
+  color: var(--parchment); letter-spacing: 0.04em;
 }
 .modal-close {
   background: none; border: none; color: var(--parchment-muted);
@@ -371,7 +327,7 @@ html, body {
 }
 .modal-body { padding: 18px; display: flex; flex-direction: column; gap: 14px; }
 
-/* ── FORM ── */
+/* ── FORMS ── */
 .form-group { display: flex; flex-direction: column; gap: 5px; }
 .form-label {
   font-family: 'Cinzel', serif; font-size: 11px; font-weight: 600;
@@ -381,37 +337,32 @@ html, body {
   background: var(--bg-raised); border: 1px solid var(--gold-border);
   border-radius: var(--radius-sm); color: var(--parchment);
   font-family: 'Crimson Text', serif; font-size: 15px;
-  padding: 9px 12px; width: 100%; outline: none;
-  -webkit-appearance: none;
+  padding: 9px 12px; width: 100%; outline: none; -webkit-appearance: none;
 }
-.form-input:focus, .form-select:focus { border-color: var(--gold-dim); }
+.form-input:focus, .form-select:focus { border-color: var(--crimson); }
 .form-row { display: flex; gap: 10px; }
 .form-row .form-group { flex: 1; }
 .form-hint { font-size: 11px; color: var(--parchment-muted); font-style: italic; }
 .form-range-row { display: flex; align-items: center; gap: 10px; }
-.form-range { flex: 1; accent-color: var(--gold); cursor: pointer; }
+.form-range { flex: 1; accent-color: var(--crimson); cursor: pointer; }
 .form-range-val {
   font-family: 'Cinzel', serif; font-size: 14px; font-weight: 600;
-  color: var(--gold-light); min-width: 38px; text-align: right;
+  color: var(--crimson); min-width: 38px; text-align: right;
 }
-.form-divider {
-  height: 1px; background: var(--gold-border); margin: 2px 0;
-}
+.form-divider { height: 1px; background: var(--gold-border); margin: 2px 0; opacity: 0.4; }
 .modal-footer {
-  padding: 14px 18px 18px;
-  display: flex; gap: 10px;
+  padding: 14px 18px 18px; display: flex; gap: 10px;
   border-top: 1px solid var(--gold-border);
 }
 .btn {
-  flex: 1; padding: 11px 16px;
-  border-radius: var(--radius-sm); font-family: 'Cinzel', serif;
-  font-size: 13px; font-weight: 600; letter-spacing: 0.04em;
-  cursor: pointer; border: none; transition: opacity 0.15s;
+  flex: 1; padding: 11px 16px; border-radius: var(--radius-sm);
+  font-family: 'Cinzel', serif; font-size: 13px; font-weight: 600;
+  letter-spacing: 0.04em; cursor: pointer; border: none; transition: opacity 0.15s;
 }
 .btn:active { opacity: 0.8; }
 .btn-primary {
   background: linear-gradient(135deg, var(--crimson-light), var(--crimson));
-  color: var(--gold-light); border: 1px solid var(--gold-dim);
+  color: var(--gold-light); border: 1px solid var(--gold-border);
 }
 .btn-ghost {
   background: var(--bg-raised); color: var(--parchment-dim);
@@ -426,21 +377,19 @@ html, body {
 /* ── TOAST ── */
 .toast {
   position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%);
-  background: var(--bg-raised); border: 1px solid var(--gold-dim);
+  background: var(--bg-deep); border: 1px solid var(--gold-border);
   color: var(--parchment); font-family: 'Crimson Text', serif;
   font-size: 14px; padding: 10px 18px; border-radius: 20px;
-  white-space: nowrap; z-index: 200;
-  box-shadow: var(--shadow);
+  white-space: nowrap; z-index: 200; box-shadow: var(--shadow);
   animation: toastIn 0.3s ease, toastOut 0.3s ease 2.2s forwards;
 }
 @keyframes toastIn  { from{opacity:0;transform:translateX(-50%) translateY(10px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
 @keyframes toastOut { to{opacity:0} }
 
-/* ── DECORATIVE ── */
+/* ── DÉCOR ── */
 .ornament {
-  text-align: center; color: var(--gold-dim);
-  font-size: 18px; letter-spacing: 8px; margin: 8px 0;
-  user-select: none;
+  text-align: center; color: var(--gold-border); font-size: 18px;
+  letter-spacing: 8px; margin: 8px 0; user-select: none;
 }
 .section-divider {
   height: 1px; margin: 12px 0;
@@ -464,89 +413,63 @@ html, body {
   border: 1px solid var(--gold-border); border-radius: var(--radius-sm);
   padding: 10px 12px;
 }
-.settings-info a { color: var(--gold); }
-.gist-id-display {
-  font-family: monospace; font-size: 11px; color: var(--gold-dim);
-  word-break: break-all; margin-top: 4px;
-}
+.settings-info a { color: var(--crimson); }
+.gist-id-display { font-family: monospace; font-size: 11px; color: var(--gold-dim); word-break: break-all; margin-top: 4px; }
 .copy-btn {
   background: var(--bg-raised); border: 1px solid var(--gold-border);
   color: var(--parchment-dim); font-size: 11px; padding: 3px 8px;
   border-radius: 4px; cursor: pointer; margin-top: 4px;
 }
-
-/* ── ITEM EDIT ACTIONS ── */
-.item-actions {
-  display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;
-}
+.item-actions { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 .quick-set-btn {
-  flex: 1; min-width: 60px;
-  background: var(--bg-raised); border: 1px solid var(--gold-border);
-  color: var(--parchment-dim); font-family: 'Crimson Text', serif;
-  font-size: 13px; padding: 6px; border-radius: var(--radius-sm);
-  cursor: pointer; text-align: center;
+  flex: 1; min-width: 60px; background: var(--bg-raised);
+  border: 1px solid var(--gold-border); color: var(--parchment-dim);
+  font-family: 'Crimson Text', serif; font-size: 13px; padding: 6px;
+  border-radius: var(--radius-sm); cursor: pointer; text-align: center;
 }
 .quick-set-btn:active { background: var(--bg-hover); }
-
-/* ── CONFIRM DIALOG ── */
 .confirm-dialog {
-  background: var(--bg-surface); border: 1px solid var(--gold-dim);
+  background: var(--bg-surface); border: 1px solid var(--gold-border);
   border-radius: var(--radius); padding: 24px 20px;
   max-width: 320px; width: 100%; text-align: center;
 }
-.confirm-dialog p {
-  font-size: 15px; color: var(--parchment); margin: 12px 0 20px;
-  line-height: 1.5;
-}
-.confirm-dialog .confirm-title {
-  font-family: 'Cinzel', serif; font-size: 16px; color: var(--gold-light);
-  font-weight: 700;
-}
+.confirm-dialog p { font-size: 15px; color: var(--parchment); margin: 12px 0 20px; line-height: 1.5; }
+.confirm-dialog .confirm-title { font-family: 'Cinzel', serif; font-size: 16px; color: var(--parchment); font-weight: 700; }
 .confirm-dialog .btn-row { display: flex; gap: 10px; }
+
+/* ── CRÉATURES AMBULANTES ── */
+.critter-walker {
+  position: absolute; z-index: 50; pointer-events: none;
+  transform-origin: center center;
+  filter: drop-shadow(0 1px 3px rgba(100,50,10,0.25));
+}
+.critter-ladybug  { width: 26px; height: 22px; }
+.critter-hedgehog { width: 32px; height: 24px; }
 </style>
 </head>
 <body>
 <div id="app"></div>
-
 <script>
 // ═══════════════════════════════════════════════════════
-//  CONFIGURATION DES ZONES
+//  CONFIG ZONES
 // ═══════════════════════════════════════════════════════
 const ZONES_CONFIG = [
-  { id:'cuisine',    name:'Cuisine',       icon:'🍳', subzones:[
-    'Fournitures de cuisine','Nourriture frigo','Nourriture non-frigo',
-    'Ustensiles','Épices','Huiles & assaisonnements','Boissons'
-  ]},
-  { id:'sdb',        name:'Salle de bain', icon:'🛁', subzones:[
-    'Soins du corps','Soins du visage','Hygiène dentaire','Cosmétiques','Accessoires & linge'
-  ]},
-  { id:'toilettes',  name:'Toilettes',     icon:'🚽', subzones:[
-    'Papier & hygiène','Nettoyants WC'
-  ]},
-  { id:'menage',     name:'Ménage',        icon:'🧹', subzones:[
-    'Produits nettoyants','Matériel de nettoyage','Sacs & poubelles'
-  ]},
-  { id:'chambre',    name:'Chambre',       icon:'🛏️', subzones:[
-    'Literie','Rangement','Divers'
-  ]},
-  { id:'utilitaires',name:'Utilitaires',  icon:'⚡', subzones:[
-    'Piles & électricité','Ampoules','Outillage','Papeterie & bureau'
-  ]}
+  { id:'cuisine',     name:'Cuisine',       icon:'🍳', subzones:['Fournitures de cuisine','Nourriture frigo','Nourriture non-frigo','Ustensiles','Épices','Huiles & assaisonnements','Boissons'] },
+  { id:'sdb',         name:'Salle de bain', icon:'🛁', subzones:['Soins du corps','Soins du visage','Hygiène dentaire','Cosmétiques','Accessoires & linge'] },
+  { id:'toilettes',   name:'Toilettes',     icon:'🚽', subzones:['Papier & hygiène','Nettoyants WC'] },
+  { id:'menage',      name:'Ménage',        icon:'🧹', subzones:['Produits nettoyants','Matériel de nettoyage','Sacs & poubelles'] },
+  { id:'chambre',     name:'Chambre',       icon:'🛏️', subzones:['Literie','Rangement','Divers'] },
+  { id:'utilitaires', name:'Utilitaires',   icon:'⚡', subzones:['Piles & électricité','Ampoules','Outillage','Papeterie & bureau'] }
 ];
 
 // ═══════════════════════════════════════════════════════
 //  ÉTAT
 // ═══════════════════════════════════════════════════════
 let state = {
-  view: 'zones',        // zones | subzones | items
-  tab:  'stocks',       // stocks | courses
-  zone: null,
-  subzone: null,
-  items: [],
-  shopping: [],
-  settings: { token:'', gistId:'' },
-  syncStatus: 'idle',   // idle | syncing | ok | error
-  lastSync: null,
+  view:'zones', tab:'stocks', zone:null, subzone:null,
+  items:[], shopping:[],
+  settings:{token:'',gistId:''},
+  syncStatus:'idle', lastSync:null,
 };
 
 // ═══════════════════════════════════════════════════════
@@ -560,13 +483,11 @@ function loadLocal() {
   try { state.items    = JSON.parse(localStorage.getItem('denrees_items')    || '[]'); } catch(e){ state.items=[]; }
   try { state.shopping = JSON.parse(localStorage.getItem('denrees_shopping') || '[]'); } catch(e){ state.shopping=[]; }
   try { state.settings = JSON.parse(localStorage.getItem('denrees_settings') || '{}'); } catch(e){ state.settings={}; }
-  state.settings.token   = state.settings.token   || '';
-  state.settings.gistId  = state.settings.gistId  || '';
+  state.settings.token  = state.settings.token  || '';
+  state.settings.gistId = state.settings.gistId || '';
   try { state.lastSync = localStorage.getItem('denrees_lastSync') || null; } catch(e){}
 }
-function saveSettings() {
-  localStorage.setItem('denrees_settings', JSON.stringify(state.settings));
-}
+function saveSettings() { localStorage.setItem('denrees_settings', JSON.stringify(state.settings)); }
 
 // ═══════════════════════════════════════════════════════
 //  GITHUB GIST SYNC
@@ -576,7 +497,7 @@ async function syncFromGist() {
   try {
     state.syncStatus = 'syncing'; renderSyncBadge();
     const r = await fetch(`https://api.github.com/gists/${state.settings.gistId}`, {
-      headers: { 'Authorization': `token ${state.settings.token}`, 'Accept': 'application/vnd.github.v3+json' }
+      headers:{ 'Authorization':`token ${state.settings.token}`, 'Accept':'application/vnd.github.v3+json' }
     });
     if (!r.ok) throw new Error(r.status);
     const gist = await r.json();
@@ -590,160 +511,221 @@ async function syncFromGist() {
     state.syncStatus = 'ok';
     state.lastSync = new Date().toISOString();
     localStorage.setItem('denrees_lastSync', state.lastSync);
-    renderSyncBadge();
-    return true;
-  } catch(e) {
-    state.syncStatus = 'error'; renderSyncBadge();
-    return false;
-  }
+    renderSyncBadge(); return true;
+  } catch(e) { state.syncStatus = 'error'; renderSyncBadge(); return false; }
 }
-
 let syncTimer = null;
-async function scheduleSyncToGist() {
-  clearTimeout(syncTimer);
-  syncTimer = setTimeout(() => syncToGist(), 1500);
-}
+function scheduleSyncToGist() { clearTimeout(syncTimer); syncTimer = setTimeout(syncToGist, 1500); }
 async function syncToGist() {
   if (!state.settings.token || !state.settings.gistId) return false;
   try {
     state.syncStatus = 'syncing'; renderSyncBadge();
-    const data = { items: state.items, shopping: state.shopping };
+    const data = { items:state.items, shopping:state.shopping };
     const r = await fetch(`https://api.github.com/gists/${state.settings.gistId}`, {
-      method: 'PATCH',
-      headers: {
-        'Authorization': `token ${state.settings.token}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ files: { 'denrees-patidou.json': { content: JSON.stringify(data, null, 2) } } })
+      method:'PATCH',
+      headers:{ 'Authorization':`token ${state.settings.token}`, 'Accept':'application/vnd.github.v3+json', 'Content-Type':'application/json' },
+      body: JSON.stringify({ files:{ 'denrees-patidou.json':{ content:JSON.stringify(data,null,2) } } })
     });
     if (!r.ok) throw new Error(r.status);
     state.syncStatus = 'ok';
     state.lastSync = new Date().toISOString();
     localStorage.setItem('denrees_lastSync', state.lastSync);
-    renderSyncBadge();
-    return true;
-  } catch(e) {
-    state.syncStatus = 'error'; renderSyncBadge();
-    return false;
-  }
+    renderSyncBadge(); return true;
+  } catch(e) { state.syncStatus = 'error'; renderSyncBadge(); return false; }
 }
-
 async function createGist(token) {
   const r = await fetch('https://api.github.com/gists', {
-    method: 'POST',
-    headers: {
-      'Authorization': `token ${token}`,
-      'Accept': 'application/vnd.github.v3+json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      description: 'Denrées du Patidou — stocks partagés',
-      public: false,
-      files: { 'denrees-patidou.json': { content: JSON.stringify({ items:[], shopping:[] }, null, 2) } }
-    })
+    method:'POST',
+    headers:{ 'Authorization':`token ${token}`, 'Accept':'application/vnd.github.v3+json', 'Content-Type':'application/json' },
+    body: JSON.stringify({ description:'Denrées du Patidou — stocks partagés', public:false, files:{ 'denrees-patidou.json':{ content:JSON.stringify({items:[],shopping:[]},null,2) } } })
   });
   if (!r.ok) throw new Error(r.status);
-  const gist = await r.json();
-  return gist.id;
+  return (await r.json()).id;
 }
 
 // ═══════════════════════════════════════════════════════
 //  UTILITAIRES
 // ═══════════════════════════════════════════════════════
-function uid() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
-
+function uid() { return Math.random().toString(36).slice(2)+Date.now().toString(36); }
 function getPercent(item) {
   if (!item.maxQty || item.maxQty <= 0) return null;
-  return Math.min(100, Math.max(0, Math.round((item.qty / item.maxQty) * 100)));
+  return Math.min(100, Math.max(0, Math.round((item.qty/item.maxQty)*100)));
 }
-
 function getStatus(item) {
   if (item.qty <= 0) return 'depleted';
   const pct = getPercent(item);
   if (pct === null) return 'ok';
-  if (pct <= (item.alertThreshold || 20)) return 'critical';
+  if (pct <= (item.alertThreshold||20)) return 'critical';
   if (pct <= 40) return 'low';
   return 'ok';
 }
-
-function statusLabel(s) {
-  return { ok:'Abondant', low:'Faible', critical:'Critique', depleted:'Épuisé' }[s] || s;
-}
-function statusBadgeClass(s) {
-  return { ok:'badge-ok', low:'badge-low', critical:'badge-critical', depleted:'badge-depleted' }[s] || '';
-}
-function statusBarClass(s) {
-  return { ok:'bar-ok', low:'bar-low', critical:'bar-critical', depleted:'bar-depleted' }[s] || 'bar-ok';
-}
-
+function statusLabel(s) { return {ok:'Abondant',low:'Faible',critical:'Critique',depleted:'Épuisé'}[s]||s; }
+function statusBadgeClass(s) { return {ok:'badge-ok',low:'badge-low',critical:'badge-critical',depleted:'badge-depleted'}[s]||''; }
+function statusBarClass(s) { return {ok:'bar-ok',low:'bar-low',critical:'bar-critical',depleted:'bar-low'}[s]||'bar-ok'; }
 function zoneHealth(zoneName) {
-  const items = state.items.filter(i => i.zone === zoneName);
-  if (!items.length) return { pct: 100, alerts: 0, depleted: 0 };
-  let totalPct = 0; let alerts = 0; let dep = 0;
-  items.forEach(i => {
-    const p = getPercent(i) ?? 100;
-    totalPct += p;
-    const s = getStatus(i);
-    if (s === 'depleted') dep++;
-    else if (s === 'critical' || s === 'low') alerts++;
-  });
-  return { pct: Math.round(totalPct / items.length), alerts, depleted: dep };
+  const items = state.items.filter(i=>i.zone===zoneName);
+  if (!items.length) return {pct:100,alerts:0,depleted:0};
+  let total=0,alerts=0,dep=0;
+  items.forEach(i=>{ total+=(getPercent(i)??100); const s=getStatus(i); if(s==='depleted')dep++; else if(s!=='ok')alerts++; });
+  return {pct:Math.round(total/items.length),alerts,depleted:dep};
 }
-
-function subzoneHealth(zoneName, subzoneName) {
-  const items = state.items.filter(i => i.zone === zoneName && i.subzone === subzoneName);
-  if (!items.length) return { pct: 100, alerts: 0 };
-  let totalPct = 0; let alerts = 0;
-  items.forEach(i => {
-    totalPct += (getPercent(i) ?? 100);
-    const s = getStatus(i);
-    if (s !== 'ok') alerts++;
-  });
-  return { pct: Math.round(totalPct / items.length), alerts };
+function subzoneHealth(zoneName,subzoneName) {
+  const items = state.items.filter(i=>i.zone===zoneName&&i.subzone===subzoneName);
+  if (!items.length) return {pct:100,alerts:0};
+  let total=0,alerts=0;
+  items.forEach(i=>{ total+=(getPercent(i)??100); if(getStatus(i)!=='ok')alerts++; });
+  return {pct:Math.round(total/items.length),alerts};
 }
-
 function healthColor(pct) {
-  if (pct <= 10) return 'var(--critical-bar)';
-  if (pct <= 40) return 'var(--low-bar)';
+  if (pct<=10) return 'var(--critical-bar)';
+  if (pct<=40) return 'var(--low-bar)';
   return 'var(--ok-bar)';
 }
-
 function syncToShoppingList(item) {
-  if (item.qty <= 0) {
-    const exists = state.shopping.find(s => s.itemId === item.id);
-    if (!exists) {
-      state.shopping.push({
-        id: uid(), itemId: item.id, name: item.name,
-        zone: item.zone, subzone: item.subzone,
-        source: 'depleted', checked: false,
-        addedAt: new Date().toISOString()
-      });
-    }
-  }
+  if (item.qty<=0 && !state.shopping.find(s=>s.itemId===item.id))
+    state.shopping.push({id:uid(),itemId:item.id,name:item.name,zone:item.zone,subzone:item.subzone,source:'depleted',checked:false,addedAt:new Date().toISOString()});
 }
-
 function removeFromShoppingIfRestocked(item) {
-  if (item.qty > 0) {
-    state.shopping = state.shopping.filter(s => s.itemId !== item.id);
-  }
+  if (item.qty>0) state.shopping=state.shopping.filter(s=>s.itemId!==item.id);
 }
-
-function syncAllToShopping() {
-  state.items.forEach(item => {
-    if (item.qty <= 0) syncToShoppingList(item);
-    else removeFromShoppingIfRestocked(item);
-  });
-}
-
+function syncAllToShopping() { state.items.forEach(i=>{ if(i.qty<=0)syncToShoppingList(i); else removeFromShoppingIfRestocked(i); }); }
 function formatLastSync(iso) {
   if (!iso) return 'jamais';
-  const d = new Date(iso);
-  const now = new Date();
-  const diff = Math.floor((now - d) / 1000);
-  if (diff < 60) return 'à l\'instant';
-  if (diff < 3600) return `il y a ${Math.floor(diff/60)} min`;
-  return d.toLocaleDateString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+  const d=new Date(iso), now=new Date(), diff=Math.floor((now-d)/1000);
+  if(diff<60) return "à l'instant";
+  if(diff<3600) return `il y a ${Math.floor(diff/60)} min`;
+  return d.toLocaleDateString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+}
+
+// ═══════════════════════════════════════════════════════
+//  CRÉATURES AMBULANTES
+// ═══════════════════════════════════════════════════════
+function makeLadybugSVG() {
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 22" style="overflow:visible">'
+    +'<ellipse cx="11" cy="12" rx="10" ry="7" fill="#d42a0a"/>'
+    +'<line x1="11" y1="5" x2="11" y2="19" stroke="#1a0000" stroke-width="0.8" opacity="0.5"/>'
+    +'<circle cx="7.5" cy="10"   r="1.6" fill="#1a0000" opacity="0.78"/>'
+    +'<circle cx="14"  cy="10"   r="1.6" fill="#1a0000" opacity="0.78"/>'
+    +'<circle cx="8"   cy="14.5" r="1.2" fill="#1a0000" opacity="0.72"/>'
+    +'<circle cx="14"  cy="14.5" r="1.2" fill="#1a0000" opacity="0.72"/>'
+    +'<circle cx="21" cy="11" r="4.2" fill="#1a0000"/>'
+    +'<circle cx="22.5" cy="9"   r="1.5"  fill="white"/>'
+    +'<circle cx="23.1" cy="9.4" r="0.55" fill="#1a0000"/>'
+    +'<path d="M21,6.8 Q19.5,3 20,1.5"   stroke="#333" stroke-width="0.9" fill="none" stroke-linecap="round"/>'
+    +'<path d="M21,6.8 Q23,3   23.5,1.5" stroke="#333" stroke-width="0.9" fill="none" stroke-linecap="round"/>'
+    +'<circle cx="20"  cy="1.5" r="1" fill="#333"/>'
+    +'<circle cx="23.5" cy="1.5" r="1" fill="#333"/>'
+    +'<line x1="6"  y1="18.5" x2="4.5"  y2="21"   stroke="#1a0000" stroke-width="0.9"/>'
+    +'<line x1="11" y1="19"   x2="10.5" y2="21.5"  stroke="#1a0000" stroke-width="0.9"/>'
+    +'<line x1="16" y1="18.5" x2="15.5" y2="21"    stroke="#1a0000" stroke-width="0.9"/>'
+    +'</svg>';
+}
+
+function makeHedgehogSVG() {
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 28" style="overflow:visible">'
+    // Corps brun
+    +'<ellipse cx="14" cy="20" rx="12" ry="7" fill="#8b6020"/>'
+    // Épines
+    +'<line x1="6"  y1="16" x2="4"  y2="9"  stroke="#4a2a08" stroke-width="1.5" stroke-linecap="round"/>'
+    +'<line x1="9"  y1="14" x2="8"  y2="7"  stroke="#4a2a08" stroke-width="1.5" stroke-linecap="round"/>'
+    +'<line x1="12" y1="13" x2="12" y2="6"  stroke="#4a2a08" stroke-width="1.5" stroke-linecap="round"/>'
+    +'<line x1="15" y1="13" x2="16" y2="6.5" stroke="#4a2a08" stroke-width="1.5" stroke-linecap="round"/>'
+    +'<line x1="18" y1="14" x2="20" y2="8"  stroke="#4a2a08" stroke-width="1.5" stroke-linecap="round"/>'
+    +'<line x1="21" y1="16" x2="24" y2="11" stroke="#4a2a08" stroke-width="1.5" stroke-linecap="round"/>'
+    // Museau (plus clair)
+    +'<ellipse cx="24" cy="20" rx="5" ry="4.5" fill="#d4a060"/>'
+    // Œil
+    +'<circle cx="27" cy="18" r="1.3" fill="#1a0000"/>'
+    +'<circle cx="27.4" cy="17.7" r="0.38" fill="white"/>'
+    // Truffe
+    +'<ellipse cx="29" cy="20.5" rx="1.1" ry="0.8" fill="#5a2020"/>'
+    // Pattes
+    +'<line x1="8"  y1="26.5" x2="7.5"  y2="28" stroke="#4a2a08" stroke-width="1.3" stroke-linecap="round"/>'
+    +'<line x1="13" y1="27.2" x2="12.5" y2="28.5" stroke="#4a2a08" stroke-width="1.3" stroke-linecap="round"/>'
+    +'<line x1="18" y1="27"   x2="18"   y2="28.5" stroke="#4a2a08" stroke-width="1.3" stroke-linecap="round"/>'
+    +'<line x1="23" y1="26.5" x2="23.5" y2="28"   stroke="#4a2a08" stroke-width="1.3" stroke-linecap="round"/>'
+    +'</svg>';
+}
+
+// Walker générique — périmètre des cartes
+function startWalker(container, type, svgHTML, speed, startCardIdx) {
+  const el = document.createElement('div');
+  el.className = 'critter-walker critter-' + type;
+  el.innerHTML = svgHTML;
+  container.appendChild(el);
+
+  const CX = type==='ladybug' ? 13 : 17;
+  const CY = type==='ladybug' ? 11 : 14;
+  let alive = true;
+  el._kill = () => { alive=false; };
+
+  let cardIdx = startCardIdx||0, edge=0, t=Math.random();
+  let pauseUntil=0, frameN=0;
+
+  function getPos(card) {
+    let x=0, y=0, cur=card;
+    while (cur && cur!==container) { x+=cur.offsetLeft; y+=cur.offsetTop; cur=cur.offsetParent; }
+    return { x, y, w:card.offsetWidth, h:card.offsetHeight };
+  }
+
+  function edgePos(c, e, t) {
+    switch(e) {
+      case 0: return { left:c.x+t*c.w     -CX, top:c.y        -CY, angle:0   };
+      case 1: return { left:c.x+c.w       -CX, top:c.y+t*c.h  -CY, angle:90  };
+      case 2: return { left:c.x+(1-t)*c.w -CX, top:c.y+c.h    -CY, angle:180 };
+      case 3: return { left:c.x           -CX, top:c.y+(1-t)*c.h-CY,angle:270 };
+    }
+  }
+
+  function frame(ts) {
+    if (!alive || !el.isConnected) return;
+    const cards = Array.from(container.querySelectorAll('.zone-card,.subzone-card'));
+    if (!cards.length) { requestAnimationFrame(frame); return; }
+    if (cardIdx>=cards.length) cardIdx=0;
+
+    const c = getPos(cards[cardIdx]);
+    const elen = (edge%2===0) ? c.w : c.h;
+    if (ts>=pauseUntil && elen>0) t += speed/elen;
+
+    frameN++;
+    if (frameN%300===0 && Math.random()<0.12)
+      pauseUntil = ts + 500 + Math.random()*2500;
+
+    if (t>=1) {
+      t=0; edge=(edge+1)%4;
+      if (edge===0 && Math.random()<0.35) {
+        cardIdx = Math.floor(Math.random()*cards.length);
+        pauseUntil = ts + 200 + Math.random()*600;
+      }
+      if (Math.random()<0.22) pauseUntil = ts + 300 + Math.random()*1200;
+    }
+
+    const p = edgePos(c, edge, t);
+    el.style.left      = p.left  + 'px';
+    el.style.top       = p.top   + 'px';
+    el.style.transform = 'rotate('+p.angle+'deg)';
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  return el;
+}
+
+let _critters = [];
+function killCritters() { _critters.forEach(c=>{ if(c._kill)c._kill(); c.remove(); }); _critters=[]; }
+
+function spawnCritters() {
+  killCritters();
+  const container = document.getElementById('mainContent');
+  if (!container) return;
+  // Petit délai pour que le layout soit stable
+  setTimeout(()=>{
+    const cards = container.querySelectorAll('.zone-card,.subzone-card');
+    if (cards.length < 2) return;
+    const n = cards.length;
+    const lb = startWalker(container, 'ladybug',  makeLadybugSVG(),  0.28, 0);
+    const hg = startWalker(container, 'hedgehog', makeHedgehogSVG(), 0.17, Math.min(2, n-1));
+    _critters = [lb, hg];
+  }, 150);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -752,41 +734,39 @@ function formatLastSync(iso) {
 const app = document.getElementById('app');
 
 function render() {
-  if (state.tab === 'courses') {
-    renderShoppingPage();
-  } else {
-    if (state.view === 'zones')    renderZonesPage();
-    if (state.view === 'subzones') renderSubzonesPage();
-    if (state.view === 'items')    renderItemsPage();
-  }
+  killCritters();
+  if (state.tab==='courses') { renderShoppingPage(); return; }
+  if (state.view==='zones')    renderZonesPage();
+  if (state.view==='subzones') renderSubzonesPage();
+  if (state.view==='items')    renderItemsPage();
 }
 
 function renderSyncBadge() {
   const el = document.querySelector('.sync-status');
   if (!el) return;
-  const map = { idle:'', syncing:'↻ sync…', ok:'✓ sync', error:'⚠ sync' };
-  el.textContent = map[state.syncStatus] || '';
-  el.className = 'sync-status ' + state.syncStatus;
+  el.textContent = {idle:'',syncing:'sync…',ok:'✓',error:'⚠'}[state.syncStatus]||'';
+  el.className = 'sync-status '+state.syncStatus;
 }
 
-function buildShell(titleEl, showBack, showSettings = true) {
-  const showSync = !!(state.settings.token && state.settings.gistId);
-  const syncText = showSync ? (state.syncStatus === 'syncing' ? '↻' : '⟳') : '';
+function buildShell(title) {
+  const showBack    = state.view!=='zones' && state.tab==='stocks';
+  const showSync    = !!(state.settings.token && state.settings.gistId);
+  const coursesBadge= state.shopping.filter(s=>!s.checked).length;
   return `
   <div class="header">
     <div class="header-left">
       ${showBack ? `<button class="back-btn" id="backBtn">◂</button>` : ''}
       <div>
-        <div class="header-title">${titleEl}</div>
+        <div class="header-title">${title}</div>
         <div class="header-subtitle">Denrées du Patidou</div>
       </div>
     </div>
     <div class="header-actions">
-      ${showSync ? `<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
-        <button class="icon-btn" id="syncBtn" title="Synchroniser">⟳</button>
-        <span class="sync-status ${state.syncStatus}">${state.syncStatus==='syncing'?'sync…':state.syncStatus==='ok'?'✓':state.syncStatus==='error'?'⚠':''}</span>
-      </div>` : ''}
-      <button class="icon-btn" id="settingsBtn" title="Paramètres">⚙</button>
+      ${showSync?`<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+        <button class="icon-btn" id="syncBtn">⟳</button>
+        <span class="sync-status ${state.syncStatus}">${{idle:'',syncing:'sync…',ok:'✓',error:'⚠'}[state.syncStatus]||''}</span>
+      </div>`:''}
+      <button class="icon-btn" id="settingsBtn">⚙</button>
     </div>
   </div>
   <div class="content" id="mainContent"></div>
@@ -796,521 +776,361 @@ function buildShell(titleEl, showBack, showSettings = true) {
     </button>
     <button class="nav-btn ${state.tab==='courses'?'active':''}" data-tab="courses">
       <span class="nav-icon">📜</span>
-      <span>Courses ${state.shopping.filter(s=>!s.checked).length>0?'('+state.shopping.filter(s=>!s.checked).length+')':''}</span>
+      <span>Courses${coursesBadge?' ('+coursesBadge+')':''}</span>
     </button>
   </nav>`;
 }
 
 function attachShellEvents() {
-  document.querySelectorAll('.nav-btn[data-tab]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      state.tab = btn.dataset.tab;
-      if (state.tab === 'stocks') { state.view = 'zones'; state.zone = null; state.subzone = null; }
+  document.querySelectorAll('.nav-btn[data-tab]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      state.tab=btn.dataset.tab;
+      if(state.tab==='stocks'){state.view='zones';state.zone=null;state.subzone=null;}
       render();
     });
   });
-  const backBtn = document.getElementById('backBtn');
-  if (backBtn) backBtn.addEventListener('click', () => {
-    if (state.view === 'items') { state.view = 'subzones'; state.subzone = null; }
-    else if (state.view === 'subzones') { state.view = 'zones'; state.zone = null; }
+  const bb=document.getElementById('backBtn');
+  if(bb) bb.addEventListener('click',()=>{
+    if(state.view==='items'){state.view='subzones';state.subzone=null;}
+    else if(state.view==='subzones'){state.view='zones';state.zone=null;}
     render();
   });
-  const syncBtn = document.getElementById('syncBtn');
-  if (syncBtn) syncBtn.addEventListener('click', async () => {
-    await syncFromGist();
-    render();
-    showToast('Grimoire synchronisé ✓');
-  });
-  document.getElementById('settingsBtn').addEventListener('click', showSettingsModal);
+  const sb=document.getElementById('syncBtn');
+  if(sb) sb.addEventListener('click',async()=>{ await syncFromGist(); render(); showToast('Grimoire synchronisé ✓'); });
+  document.getElementById('settingsBtn').addEventListener('click',showSettingsModal);
 }
 
 // ── ZONES ──
 function renderZonesPage() {
-  app.innerHTML = buildShell('Le Grimoire des Stocks', false);
+  app.innerHTML = buildShell('Le Grimoire des Stocks');
   attachShellEvents();
-  const content = document.getElementById('mainContent');
-  content.innerHTML = `
+  const c = document.getElementById('mainContent');
+  c.innerHTML = `
     <div class="ornament">✦ ✧ ✦</div>
     <div class="zones-grid">
-      ${ZONES_CONFIG.map(z => {
-        const h = zoneHealth(z.name);
-        const count = state.items.filter(i => i.zone === z.name).length;
-        const alertN = h.alerts + h.depleted;
+      ${ZONES_CONFIG.map(z=>{
+        const h=zoneHealth(z.name), cnt=state.items.filter(i=>i.zone===z.name).length, alertN=h.alerts+h.depleted;
         return `<div class="zone-card" data-zone="${z.name}">
-          ${alertN > 0 ? `<div class="zone-alert-badge">${alertN}</div>` : ''}
+          ${alertN?`<div class="zone-alert-badge">${alertN}</div>`:''}
           <div class="zone-icon">${z.icon}</div>
           <div class="zone-name">${z.name}</div>
-          <div class="zone-stats">${count} denrée${count!==1?'s':''}</div>
-          <div class="zone-health">
-            <div class="zone-health-bar" style="width:${h.pct}%;background:${healthColor(h.pct)}"></div>
-          </div>
+          <div class="zone-stats">${cnt} denrée${cnt!==1?'s':''}</div>
+          <div class="zone-health"><div class="zone-health-bar" style="width:${h.pct}%;background:${healthColor(h.pct)}"></div></div>
         </div>`;
       }).join('')}
     </div>
     <div class="ornament" style="margin-top:12px">⁂</div>`;
-  document.querySelectorAll('.zone-card[data-zone]').forEach(el => {
-    el.addEventListener('click', () => {
-      state.zone = el.dataset.zone;
-      state.view = 'subzones';
-      render();
-    });
+  document.querySelectorAll('.zone-card[data-zone]').forEach(el=>{
+    el.addEventListener('click',()=>{ state.zone=el.dataset.zone; state.view='subzones'; render(); });
   });
+  spawnCritters();
 }
 
 // ── SUBZONES ──
 function renderSubzonesPage() {
-  const zConf = ZONES_CONFIG.find(z => z.name === state.zone);
-  app.innerHTML = buildShell(`${zConf.icon} ${state.zone}`, true);
+  const zConf=ZONES_CONFIG.find(z=>z.name===state.zone);
+  app.innerHTML = buildShell(`${zConf.icon} ${state.zone}`);
   attachShellEvents();
-  const content = document.getElementById('mainContent');
-  content.innerHTML = `
-    <div class="subzone-list">
-      ${zConf.subzones.map(sz => {
-        const h = subzoneHealth(state.zone, sz);
-        const count = state.items.filter(i => i.zone === state.zone && i.subzone === sz).length;
-        return `<div class="subzone-card" data-sz="${sz}">
-          <div class="subzone-info">
-            <div class="subzone-name">${sz}</div>
-            <div class="subzone-count">${count} denrée${count!==1?'s':''}</div>
-          </div>
-          <div class="subzone-health">
-            <div class="subzone-health-bar-bg">
-              <div class="subzone-health-fill" style="width:${h.pct}%;background:${healthColor(h.pct)}"></div>
-            </div>
-            <div class="subzone-health-label">${h.pct}%</div>
-          </div>
-          ${h.alerts > 0 ? `<div class="subzone-alert">⚠</div>` : `<div class="subzone-arrow">▶</div>`}
-        </div>`;
-      }).join('')}
+  const c=document.getElementById('mainContent');
+  c.innerHTML = `<div class="subzone-list">${zConf.subzones.map(sz=>{
+    const h=subzoneHealth(state.zone,sz), cnt=state.items.filter(i=>i.zone===state.zone&&i.subzone===sz).length;
+    return `<div class="subzone-card" data-sz="${sz}">
+      <div class="subzone-info">
+        <div class="subzone-name">${sz}</div>
+        <div class="subzone-count">${cnt} denrée${cnt!==1?'s':''}</div>
+      </div>
+      <div class="subzone-health">
+        <div class="subzone-health-bar-bg"><div class="subzone-health-fill" style="width:${h.pct}%;background:${healthColor(h.pct)}"></div></div>
+        <div class="subzone-health-label">${h.pct}%</div>
+      </div>
+      ${h.alerts?`<div class="subzone-alert">⚠</div>`:`<div class="subzone-arrow">▶</div>`}
     </div>`;
-  document.querySelectorAll('.subzone-card[data-sz]').forEach(el => {
-    el.addEventListener('click', () => {
-      state.subzone = el.dataset.sz;
-      state.view = 'items';
-      render();
-    });
+  }).join('')}</div>`;
+  document.querySelectorAll('.subzone-card[data-sz]').forEach(el=>{
+    el.addEventListener('click',()=>{ state.subzone=el.dataset.sz; state.view='items'; render(); });
   });
+  spawnCritters();
 }
 
 // ── ITEMS ──
 function renderItemsPage() {
-  const zConf = ZONES_CONFIG.find(z => z.name === state.zone);
-  app.innerHTML = buildShell(`${state.subzone}`, true);
+  const zConf=ZONES_CONFIG.find(z=>z.name===state.zone);
+  app.innerHTML = buildShell(state.subzone);
   attachShellEvents();
-  const content = document.getElementById('mainContent');
-  const items = state.items.filter(i => i.zone === state.zone && i.subzone === state.subzone);
-
+  const c=document.getElementById('mainContent');
+  const items=state.items.filter(i=>i.zone===state.zone&&i.subzone===state.subzone);
   if (!items.length) {
-    content.innerHTML = `<div class="empty-state"><span class="icon">🪄</span>Aucune denrée encore inscrite dans ce grimoire.<br><br><em>Appuyez sur ✦ pour en ajouter une.</em></div>`;
+    c.innerHTML=`<div class="empty-state"><span class="icon">🪄</span>Aucune denrée encore inscrite.<br><br><em>Appuyez sur ✦ pour en ajouter.</em></div>`;
   } else {
-    content.innerHTML = `<div class="item-list">${items.map(item => {
-      const s = getStatus(item);
-      const pct = getPercent(item);
-      const pctDisp = pct !== null ? pct + '%' : '—';
-      const pctBar  = pct !== null ? pct : 100;
+    c.innerHTML=`<div class="item-list">${items.map(item=>{
+      const s=getStatus(item), pct=getPercent(item);
       return `<div class="item-card ${s==='depleted'?'depleted':''}" data-id="${item.id}">
         <div class="item-card-top">
           <div class="item-name">${item.name}</div>
           <span class="item-status-badge ${statusBadgeClass(s)}">${statusLabel(s)}</span>
         </div>
-        <div class="item-qty">${item.qty} ${item.unit || ''}${item.maxQty ? ' / ' + item.maxQty + ' ' + (item.unit||'') : ''}</div>
-        <div class="item-bar-bg">
-          <div class="item-bar-fill ${statusBarClass(s)}" style="width:${s==='depleted'?0:pctBar}%"></div>
-        </div>
+        <div class="item-qty">${item.qty} ${item.unit||''}${item.maxQty?' / '+item.maxQty+' '+(item.unit||''):''}</div>
+        <div class="item-bar-bg"><div class="item-bar-fill ${statusBarClass(s)}" style="width:${s==='depleted'?0:(pct??100)}%"></div></div>
         <div class="item-bar-labels">
-          <span>${pctDisp}</span>
-          ${item.alertThreshold ? `<span>⚠ ${item.alertThreshold}%</span>` : ''}
+          <span>${pct!==null?pct+'%':'—'}</span>
+          ${item.alertThreshold?`<span>⚠ ${item.alertThreshold}%</span>`:''}
         </div>
       </div>`;
     }).join('')}</div>`;
   }
-
-  // FAB
-  const fab = document.createElement('button');
-  fab.className = 'fab'; fab.innerHTML = '✦'; fab.title = 'Ajouter';
+  const fab=document.createElement('button');
+  fab.className='fab'; fab.innerHTML='✦';
   app.appendChild(fab);
-  fab.addEventListener('click', () => showAddItemModal(state.zone, state.subzone));
-
-  document.querySelectorAll('.item-card[data-id]').forEach(el => {
-    el.addEventListener('click', () => showEditItemModal(el.dataset.id));
+  fab.addEventListener('click',()=>showAddItemModal(state.zone,state.subzone));
+  document.querySelectorAll('.item-card[data-id]').forEach(el=>{
+    el.addEventListener('click',()=>showEditItemModal(el.dataset.id));
   });
 }
 
 // ── SHOPPING ──
 function renderShoppingPage() {
-  app.innerHTML = buildShell('Liste de Courses', false);
+  app.innerHTML = buildShell('Parchemin des Manques');
   attachShellEvents();
-  const content = document.getElementById('mainContent');
-  const unchecked = state.shopping.filter(s => !s.checked);
-  const checked   = state.shopping.filter(s =>  s.checked);
-
-  let html = `<div class="shopping-header">
-    <div class="shopping-title">Parchemin des Manques</div>
-    ${state.shopping.length ? `<button class="shopping-clear-btn" id="clearCheckedBtn">Effacer cochés</button>` : ''}
+  const c=document.getElementById('mainContent');
+  const unchecked=state.shopping.filter(s=>!s.checked);
+  const checked=state.shopping.filter(s=>s.checked);
+  let html=`<div class="shopping-header">
+    <div class="shopping-title">Liste de Courses</div>
+    ${state.shopping.length?`<button class="shopping-clear-btn" id="clearChecked">Effacer cochés</button>`:''}
   </div>`;
-
   if (!state.shopping.length) {
-    html += `<div class="shopping-empty"><span class="empty-icon">✨</span>Le garde-manger est bien garni !<br>Aucun manque à signaler.</div>`;
+    html+=`<div class="shopping-empty"><span class="empty-icon">✨</span>Les étagères sont bien garnies !<br>Aucun manque à signaler.</div>`;
   } else {
-    const renderItem = (item) => `
-      <div class="shopping-item ${item.checked?'checked':''}" data-sid="${item.id}">
-        <div class="shopping-checkbox">${item.checked ? '✓' : ''}</div>
-        <div class="shopping-item-info">
-          <div class="shopping-item-name">${item.name}</div>
-          <div class="shopping-item-meta">${item.zone} › ${item.subzone}</div>
-        </div>
-        <span class="shopping-item-source ${item.source==='manual'?'manual':''}">${item.source==='depleted'?'épuisé':'manuel'}</span>
-      </div>`;
+    const renderItem=item=>`<div class="shopping-item ${item.checked?'checked':''}" data-sid="${item.id}">
+      <div class="shopping-checkbox">${item.checked?'✓':''}</div>
+      <div class="shopping-item-info">
+        <div class="shopping-item-name">${item.name}</div>
+        <div class="shopping-item-meta">${item.zone||''}${item.subzone?' › '+item.subzone:''}</div>
+      </div>
+      <span class="shopping-item-source ${item.source==='manual'?'manual':''}">${item.source==='depleted'?'épuisé':'manuel'}</span>
+    </div>`;
     html += unchecked.map(renderItem).join('');
     if (checked.length) {
-      html += `<div class="section-divider"></div><div style="font-size:12px;color:var(--parchment-muted);font-style:italic;margin:8px 0 4px">Obtenus</div>`;
-      html += checked.map(renderItem).join('');
+      html+=`<div class="section-divider"></div><div style="font-size:12px;color:var(--parchment-muted);font-style:italic;margin:6px 0">Obtenus</div>`;
+      html+=checked.map(renderItem).join('');
     }
   }
-
-  html += `<button class="shopping-add-btn" id="addManualBtn">✦ Ajouter manuellement</button>`;
-  content.innerHTML = html;
-
-  document.querySelectorAll('.shopping-item[data-sid]').forEach(el => {
-    el.addEventListener('click', () => {
-      const item = state.shopping.find(s => s.id === el.dataset.sid);
-      if (!item) return;
-      item.checked = !item.checked;
-      saveLocal(); scheduleSyncToGist(); render();
-    });
+  html+=`<button class="shopping-add-btn" id="addManualBtn">✦ Ajouter manuellement</button>`;
+  c.innerHTML=html;
+  document.querySelectorAll('.shopping-item[data-sid]').forEach(el=>{
+    el.addEventListener('click',()=>{ const it=state.shopping.find(s=>s.id===el.dataset.sid); if(it){it.checked=!it.checked; saveLocal(); scheduleSyncToGist(); render();} });
   });
-  const clearBtn = document.getElementById('clearCheckedBtn');
-  if (clearBtn) clearBtn.addEventListener('click', () => {
-    state.shopping = state.shopping.filter(s => !s.checked);
-    saveLocal(); scheduleSyncToGist(); render();
-  });
-  document.getElementById('addManualBtn').addEventListener('click', showAddManualShoppingModal);
+  const clr=document.getElementById('clearChecked');
+  if(clr) clr.addEventListener('click',()=>{ state.shopping=state.shopping.filter(s=>!s.checked); saveLocal(); scheduleSyncToGist(); render(); });
+  document.getElementById('addManualBtn').addEventListener('click',showAddManualShoppingModal);
 }
 
 // ═══════════════════════════════════════════════════════
 //  MODALES
 // ═══════════════════════════════════════════════════════
-function openModal(html, center = false) {
+function openModal(html,center=false) {
   closeModal();
-  const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay' + (center ? ' center' : '');
-  overlay.id = 'modalOverlay';
-  overlay.innerHTML = `<div class="modal">${html}</div>`;
-  app.appendChild(overlay);
-  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
-  return overlay;
+  const o=document.createElement('div');
+  o.className='modal-overlay'+(center?' center':''); o.id='modalOverlay';
+  o.innerHTML=`<div class="modal">${html}</div>`;
+  app.appendChild(o);
+  o.addEventListener('click',e=>{ if(e.target===o)closeModal(); });
+  return o;
 }
-function closeModal() {
-  const m = document.getElementById('modalOverlay');
-  if (m) m.remove();
-}
+function closeModal() { const m=document.getElementById('modalOverlay'); if(m)m.remove(); }
 
-// ── AJOUTER UN ARTICLE ──
-function showAddItemModal(zone, subzone) {
-  const html = `
-  <div class="modal-header">
-    <div class="modal-title">✦ Nouvelle Denrée</div>
-    <button class="modal-close" id="mClose">✕</button>
-  </div>
+function showAddItemModal(zone,subzone) {
+  openModal(`
+  <div class="modal-header"><div class="modal-title">✦ Nouvelle Denrée</div><button class="modal-close" id="mClose">✕</button></div>
   <div class="modal-body">
-    <div class="form-group">
-      <label class="form-label">Nom de la denrée</label>
-      <input class="form-input" id="fName" placeholder="ex: Sel, Shampoing…" autocomplete="off">
-    </div>
+    <div class="form-group"><label class="form-label">Nom de la denrée</label>
+      <input class="form-input" id="fName" placeholder="ex: Sel, Shampoing…" autocomplete="off"></div>
     <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Quantité actuelle</label>
-        <input class="form-input" id="fQty" type="number" min="0" placeholder="0" inputmode="decimal">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Quantité max</label>
-        <input class="form-input" id="fMaxQty" type="number" min="1" placeholder="100" inputmode="decimal">
-      </div>
+      <div class="form-group"><label class="form-label">Quantité actuelle</label>
+        <input class="form-input" id="fQty" type="number" min="0" placeholder="0" inputmode="decimal"></div>
+      <div class="form-group"><label class="form-label">Quantité max</label>
+        <input class="form-input" id="fMaxQty" type="number" min="1" placeholder="100" inputmode="decimal"></div>
     </div>
+    <div class="form-group"><label class="form-label">Unité</label>
+      <input class="form-input" id="fUnit" placeholder="g, mL, unités, rouleaux…" autocomplete="off"></div>
     <div class="form-group">
-      <label class="form-label">Unité</label>
-      <input class="form-input" id="fUnit" placeholder="g, mL, unités, rouleaux…" autocomplete="off">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Seuil d'alerte — <span id="thresholdLabel">20%</span></label>
+      <label class="form-label">Seuil d'alerte — <span id="tVal">20%</span></label>
       <div class="form-range-row">
-        <input type="range" class="form-range" id="fThreshold" min="5" max="80" value="20" step="5">
-        <span class="form-range-val" id="thresholdVal">20%</span>
+        <input type="range" class="form-range" id="fThresh" min="5" max="80" value="20" step="5">
+        <span class="form-range-val" id="tValR">20%</span>
       </div>
-      <div class="form-hint">En dessous de ce seuil, la denrée sera marquée Critique.</div>
+      <div class="form-hint">En dessous de ce seuil → statut Critique.</div>
     </div>
   </div>
   <div class="modal-footer">
     <button class="btn btn-ghost" id="mCancel">Annuler</button>
     <button class="btn btn-primary" id="mSave">Inscrire au Grimoire</button>
-  </div>`;
-  openModal(html);
-  document.getElementById('mClose').addEventListener('click', closeModal);
-  document.getElementById('mCancel').addEventListener('click', closeModal);
-  const range = document.getElementById('fThreshold');
-  range.addEventListener('input', () => {
-    document.getElementById('thresholdVal').textContent = range.value + '%';
-  });
-  document.getElementById('mSave').addEventListener('click', () => {
-    const name = document.getElementById('fName').value.trim();
-    if (!name) { document.getElementById('fName').focus(); return; }
-    const qty    = parseFloat(document.getElementById('fQty').value)    || 0;
-    const maxQty = parseFloat(document.getElementById('fMaxQty').value) || 0;
-    const unit   = document.getElementById('fUnit').value.trim();
-    const threshold = parseInt(range.value);
-    const item = { id: uid(), zone, subzone, name, qty, maxQty, unit, alertThreshold: threshold };
-    state.items.push(item);
-    syncToShoppingList(item);
-    saveLocal(); scheduleSyncToGist();
-    closeModal(); render();
-    showToast(`"${name}" inscrit ✦`);
+  </div>`);
+  document.getElementById('mClose').addEventListener('click',closeModal);
+  document.getElementById('mCancel').addEventListener('click',closeModal);
+  const r=document.getElementById('fThresh');
+  r.addEventListener('input',()=>{ document.getElementById('tVal').textContent=r.value+'%'; document.getElementById('tValR').textContent=r.value+'%'; });
+  document.getElementById('mSave').addEventListener('click',()=>{
+    const name=document.getElementById('fName').value.trim(); if(!name){document.getElementById('fName').focus();return;}
+    const item={id:uid(),zone,subzone,name,qty:parseFloat(document.getElementById('fQty').value)||0,maxQty:parseFloat(document.getElementById('fMaxQty').value)||0,unit:document.getElementById('fUnit').value.trim(),alertThreshold:parseInt(r.value)};
+    state.items.push(item); syncToShoppingList(item); saveLocal(); scheduleSyncToGist();
+    closeModal(); render(); showToast(`"${name}" inscrit ✦`);
   });
 }
 
-// ── MODIFIER UN ARTICLE ──
 function showEditItemModal(itemId) {
-  const item = state.items.find(i => i.id === itemId);
-  if (!item) return;
-  const s = getStatus(item);
-  const html = `
-  <div class="modal-header">
-    <div class="modal-title">⚗ ${item.name}</div>
-    <button class="modal-close" id="mClose">✕</button>
-  </div>
+  const item=state.items.find(i=>i.id===itemId); if(!item)return;
+  const s=getStatus(item);
+  openModal(`
+  <div class="modal-header"><div class="modal-title">⚗ ${item.name}</div><button class="modal-close" id="mClose">✕</button></div>
   <div class="modal-body">
-    <div class="form-group">
-      <label class="form-label">Nom</label>
-      <input class="form-input" id="fName" value="${item.name}" autocomplete="off">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Quantité actuelle</label>
+    <div class="form-group"><label class="form-label">Nom</label>
+      <input class="form-input" id="fName" value="${item.name}" autocomplete="off"></div>
+    <div class="form-group"><label class="form-label">Quantité actuelle</label>
       <input class="form-input" id="fQty" type="number" min="0" value="${item.qty}" inputmode="decimal">
       <div class="item-actions">
         <button class="quick-set-btn" data-q="0">Épuisé</button>
-        <button class="quick-set-btn" data-q="25pct">25%</button>
-        <button class="quick-set-btn" data-q="50pct">50%</button>
+        <button class="quick-set-btn" data-q="25">25%</button>
+        <button class="quick-set-btn" data-q="50">50%</button>
         <button class="quick-set-btn" data-q="max">Plein</button>
       </div>
     </div>
     <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Quantité max</label>
-        <input class="form-input" id="fMaxQty" type="number" min="1" value="${item.maxQty || ''}" inputmode="decimal">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Unité</label>
-        <input class="form-input" id="fUnit" value="${item.unit||''}" autocomplete="off">
-      </div>
+      <div class="form-group"><label class="form-label">Quantité max</label>
+        <input class="form-input" id="fMaxQty" type="number" min="1" value="${item.maxQty||''}" inputmode="decimal"></div>
+      <div class="form-group"><label class="form-label">Unité</label>
+        <input class="form-input" id="fUnit" value="${item.unit||''}" autocomplete="off"></div>
     </div>
     <div class="form-group">
-      <label class="form-label">Seuil d'alerte — <span id="thresholdVal">${item.alertThreshold||20}%</span></label>
+      <label class="form-label">Seuil d'alerte — <span id="tVal">${item.alertThreshold||20}%</span></label>
       <div class="form-range-row">
-        <input type="range" class="form-range" id="fThreshold" min="5" max="80" value="${item.alertThreshold||20}" step="5">
-        <span class="form-range-val" id="thresholdValRight">${item.alertThreshold||20}%</span>
+        <input type="range" class="form-range" id="fThresh" min="5" max="80" value="${item.alertThreshold||20}" step="5">
+        <span class="form-range-val" id="tValR">${item.alertThreshold||20}%</span>
       </div>
     </div>
-    <div class="form-divider"></div>
-    ${s === 'depleted' ? `<div style="text-align:center;color:var(--depleted-text);font-style:italic;font-size:14px">⚠ Cette denrée est épuisée — elle figure dans la liste de courses.</div>` : ''}
+    ${s==='depleted'?`<div style="text-align:center;color:var(--depleted-text);font-style:italic;font-size:13px;padding:4px">⚠ Cette denrée est épuisée — elle figure dans la liste de courses.</div>`:''}
   </div>
   <div class="modal-footer" style="flex-wrap:wrap;gap:8px">
     <button class="btn btn-danger btn-sm" id="mDelete" style="flex:0 0 auto">Supprimer</button>
     <button class="btn btn-ghost" id="mCancel" style="flex:1">Annuler</button>
     <button class="btn btn-primary" id="mSave" style="flex:2">Sauvegarder</button>
-  </div>`;
-  openModal(html);
-  document.getElementById('mClose').addEventListener('click', closeModal);
-  document.getElementById('mCancel').addEventListener('click', closeModal);
-  const range = document.getElementById('fThreshold');
-  range.addEventListener('input', () => {
-    const v = range.value + '%';
-    document.getElementById('thresholdVal').textContent = v;
-    document.getElementById('thresholdValRight').textContent = v;
-  });
-  document.querySelectorAll('.quick-set-btn[data-q]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const qInput = document.getElementById('fQty');
-      const max = parseFloat(document.getElementById('fMaxQty').value) || item.maxQty || 0;
-      const q = btn.dataset.q;
-      if (q === '0') qInput.value = 0;
-      else if (q === '25pct') qInput.value = Math.round(max * 0.25);
-      else if (q === '50pct') qInput.value = Math.round(max * 0.5);
-      else if (q === 'max')   qInput.value = max;
+  </div>`);
+  document.getElementById('mClose').addEventListener('click',closeModal);
+  document.getElementById('mCancel').addEventListener('click',closeModal);
+  const r=document.getElementById('fThresh');
+  r.addEventListener('input',()=>{ document.getElementById('tVal').textContent=r.value+'%'; document.getElementById('tValR').textContent=r.value+'%'; });
+  document.querySelectorAll('.quick-set-btn[data-q]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const q=document.getElementById('fQty'), max=parseFloat(document.getElementById('fMaxQty').value)||item.maxQty||0;
+      const v=btn.dataset.q;
+      if(v==='0')q.value=0; else if(v==='25')q.value=Math.round(max*0.25); else if(v==='50')q.value=Math.round(max*0.5); else q.value=max;
     });
   });
-  document.getElementById('mDelete').addEventListener('click', () => {
-    showConfirm(`Supprimer "${item.name}" ?`, 'Cette action effacera définitivement cette denrée du grimoire.', () => {
-      state.items = state.items.filter(i => i.id !== itemId);
-      state.shopping = state.shopping.filter(s => s.itemId !== itemId);
-      saveLocal(); scheduleSyncToGist();
-      closeModal(); render();
-      showToast(`"${item.name}" effacé`);
+  document.getElementById('mDelete').addEventListener('click',()=>{
+    showConfirm(`Supprimer "${item.name}" ?`,'Cette denrée sera effacée définitivement.',()=>{
+      state.items=state.items.filter(i=>i.id!==itemId);
+      state.shopping=state.shopping.filter(s=>s.itemId!==itemId);
+      saveLocal(); scheduleSyncToGist(); closeModal(); render(); showToast(`"${item.name}" effacé`);
     });
   });
-  document.getElementById('mSave').addEventListener('click', () => {
-    const name = document.getElementById('fName').value.trim();
-    if (!name) return;
-    item.name   = name;
-    item.qty    = parseFloat(document.getElementById('fQty').value) || 0;
-    item.maxQty = parseFloat(document.getElementById('fMaxQty').value) || 0;
-    item.unit   = document.getElementById('fUnit').value.trim();
-    item.alertThreshold = parseInt(range.value);
-    syncToShoppingList(item);
-    removeFromShoppingIfRestocked(item);
-    saveLocal(); scheduleSyncToGist();
-    closeModal(); render();
-    showToast('Denrée mise à jour ✓');
+  document.getElementById('mSave').addEventListener('click',()=>{
+    const name=document.getElementById('fName').value.trim(); if(!name)return;
+    item.name=name; item.qty=parseFloat(document.getElementById('fQty').value)||0;
+    item.maxQty=parseFloat(document.getElementById('fMaxQty').value)||0;
+    item.unit=document.getElementById('fUnit').value.trim(); item.alertThreshold=parseInt(r.value);
+    syncToShoppingList(item); removeFromShoppingIfRestocked(item);
+    saveLocal(); scheduleSyncToGist(); closeModal(); render(); showToast('Denrée mise à jour ✓');
   });
 }
 
-// ── AJOUT MANUEL LISTE COURSES ──
 function showAddManualShoppingModal() {
-  const html = `
-  <div class="modal-header">
-    <div class="modal-title">📜 Ajouter au Parchemin</div>
-    <button class="modal-close" id="mClose">✕</button>
-  </div>
+  openModal(`
+  <div class="modal-header"><div class="modal-title">📜 Ajouter au Parchemin</div><button class="modal-close" id="mClose">✕</button></div>
   <div class="modal-body">
-    <div class="form-group">
-      <label class="form-label">Article à acheter</label>
-      <input class="form-input" id="fName" placeholder="ex: Pain, Café…" autocomplete="off">
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Zone</label>
-        <select class="form-select" id="fZone">
-          <option value="">— Choisir —</option>
-          ${ZONES_CONFIG.map(z => `<option value="${z.name}">${z.name}</option>`).join('')}
-        </select>
-      </div>
+    <div class="form-group"><label class="form-label">Article</label>
+      <input class="form-input" id="fName" placeholder="ex: Pain, Café…" autocomplete="off"></div>
+    <div class="form-group"><label class="form-label">Zone (optionnel)</label>
+      <select class="form-select" id="fZone">
+        <option value="">— Choisir —</option>
+        ${ZONES_CONFIG.map(z=>`<option value="${z.name}">${z.name}</option>`).join('')}
+      </select>
     </div>
   </div>
   <div class="modal-footer">
     <button class="btn btn-ghost" id="mCancel">Annuler</button>
     <button class="btn btn-primary" id="mSave">Ajouter</button>
-  </div>`;
-  openModal(html);
-  document.getElementById('mClose').addEventListener('click', closeModal);
-  document.getElementById('mCancel').addEventListener('click', closeModal);
-  document.getElementById('mSave').addEventListener('click', () => {
-    const name = document.getElementById('fName').value.trim();
-    if (!name) return;
-    const zone = document.getElementById('fZone').value;
-    state.shopping.push({ id: uid(), name, zone, subzone:'', source:'manual', checked: false, addedAt: new Date().toISOString() });
-    saveLocal(); scheduleSyncToGist();
-    closeModal(); render();
-    showToast(`"${name}" ajouté ✓`);
+  </div>`);
+  document.getElementById('mClose').addEventListener('click',closeModal);
+  document.getElementById('mCancel').addEventListener('click',closeModal);
+  document.getElementById('mSave').addEventListener('click',()=>{
+    const name=document.getElementById('fName').value.trim(); if(!name)return;
+    state.shopping.push({id:uid(),name,zone:document.getElementById('fZone').value,subzone:'',source:'manual',checked:false,addedAt:new Date().toISOString()});
+    saveLocal(); scheduleSyncToGist(); closeModal(); render(); showToast(`"${name}" ajouté ✓`);
   });
 }
 
-// ── PARAMÈTRES ──
 function showSettingsModal() {
-  const hasConfig = !!(state.settings.token && state.settings.gistId);
-  const html = `
-  <div class="modal-header">
-    <div class="modal-title">⚙ Configuration du Grimoire</div>
-    <button class="modal-close" id="mClose">✕</button>
-  </div>
+  const has=!!(state.settings.token&&state.settings.gistId);
+  openModal(`
+  <div class="modal-header"><div class="modal-title">⚙ Configuration</div><button class="modal-close" id="mClose">✕</button></div>
   <div class="modal-body">
     <div class="settings-section-title">Synchronisation entre téléphones</div>
-    <div class="settings-info">
-      Pour partager les stocks entre deux téléphones, créez un <strong>Personal Access Token</strong> GitHub avec la portée <em>gist</em>.<br>
-      <a href="https://github.com/settings/tokens/new?scopes=gist&description=Denrees+Patidou" target="_blank">→ Créer le token GitHub</a>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Token GitHub (portée gist)</label>
-      <input class="form-input" id="fToken" type="password" value="${state.settings.token}" placeholder="ghp_…" autocomplete="off">
-    </div>
-    ${hasConfig ? `
-    <div class="form-group">
-      <label class="form-label">ID du Grimoire Partagé (Gist ID)</label>
+    <div class="settings-info">Créez un <strong>Personal Access Token</strong> GitHub avec la portée <em>gist</em>.<br>
+      <a href="https://github.com/settings/tokens/new?scopes=gist&description=Denrees+Patidou" target="_blank">→ Créer le token GitHub</a></div>
+    <div class="form-group"><label class="form-label">Token GitHub (portée gist)</label>
+      <input class="form-input" id="fToken" type="password" value="${state.settings.token}" placeholder="ghp_…" autocomplete="off"></div>
+    ${has?`<div class="form-group"><label class="form-label">ID du Grimoire Partagé</label>
       <div class="gist-id-display">${state.settings.gistId}</div>
-      <button class="copy-btn" id="copyGistId">Copier pour l'autre téléphone</button>
-      <div class="form-hint">Sur le second téléphone : même token + ce Gist ID</div>
-    </div>` : `
-    <div class="form-group">
-      <label class="form-label">Gist ID (laisser vide pour en créer un)</label>
-      <input class="form-input" id="fGistId" value="${state.settings.gistId}" placeholder="laisser vide = créer automatiquement" autocomplete="off">
-    </div>`}
-    ${state.lastSync ? `<div class="form-hint" style="text-align:center">Dernière synchro : ${formatLastSync(state.lastSync)}</div>` : ''}
+      <button class="copy-btn" id="copyGist">Copier pour l'autre téléphone</button>
+      <div class="form-hint">Sur le 2e téléphone : même token + ce Gist ID</div></div>`
+    :`<div class="form-group"><label class="form-label">Gist ID (laisser vide = créer automatiquement)</label>
+      <input class="form-input" id="fGistId" value="${state.settings.gistId}" placeholder="laisser vide" autocomplete="off"></div>`}
+    ${state.lastSync?`<div class="form-hint" style="text-align:center">Dernière synchro : ${formatLastSync(state.lastSync)}</div>`:''}
   </div>
   <div class="modal-footer">
     <button class="btn btn-ghost" id="mCancel">Fermer</button>
     <button class="btn btn-primary" id="mSave">Enregistrer & Tester</button>
-  </div>`;
-  openModal(html, true);
-  document.getElementById('mClose').addEventListener('click', closeModal);
-  document.getElementById('mCancel').addEventListener('click', closeModal);
-  const copyBtn = document.getElementById('copyGistId');
-  if (copyBtn) copyBtn.addEventListener('click', () => {
-    navigator.clipboard.writeText(state.settings.gistId).then(() => showToast('ID copié ✓'));
-  });
-  document.getElementById('mSave').addEventListener('click', async () => {
-    const token = document.getElementById('fToken').value.trim();
-    if (!token) { showToast('Token manquant ⚠'); return; }
-    const gistInput = document.getElementById('fGistId');
-    let gistId = gistInput ? gistInput.value.trim() : state.settings.gistId;
-    state.settings.token = token;
-    const saveBtn = document.getElementById('mSave');
-    saveBtn.textContent = 'Connexion…'; saveBtn.disabled = true;
+  </div>`,true);
+  document.getElementById('mClose').addEventListener('click',closeModal);
+  document.getElementById('mCancel').addEventListener('click',closeModal);
+  const cg=document.getElementById('copyGist');
+  if(cg) cg.addEventListener('click',()=>navigator.clipboard.writeText(state.settings.gistId).then(()=>showToast('ID copié ✓')));
+  document.getElementById('mSave').addEventListener('click',async()=>{
+    const token=document.getElementById('fToken').value.trim(); if(!token){showToast('Token manquant ⚠');return;}
+    const gi=document.getElementById('fGistId'); let gistId=gi?gi.value.trim():state.settings.gistId;
+    state.settings.token=token;
+    const btn=document.getElementById('mSave'); btn.textContent='Connexion…'; btn.disabled=true;
     try {
-      if (!gistId) {
-        gistId = await createGist(token);
-        showToast('Grimoire partagé créé ✓');
-      }
-      state.settings.gistId = gistId;
-      saveSettings();
-      const ok = await syncFromGist();
-      if (ok) { showToast('Synchronisation réussie ✓'); closeModal(); render(); }
-      else { showToast('Erreur de connexion ⚠'); saveBtn.textContent = 'Enregistrer & Tester'; saveBtn.disabled = false; }
-    } catch(e) {
-      showToast('Erreur : ' + e.message);
-      saveBtn.textContent = 'Enregistrer & Tester'; saveBtn.disabled = false;
-    }
+      if (!gistId) { gistId=await createGist(token); showToast('Grimoire partagé créé ✓'); }
+      state.settings.gistId=gistId; saveSettings();
+      const ok=await syncFromGist();
+      if(ok){showToast('Synchronisation réussie ✓'); closeModal(); render();}
+      else{showToast('Erreur de connexion ⚠'); btn.textContent='Enregistrer & Tester'; btn.disabled=false;}
+    } catch(e){showToast('Erreur : '+e.message); btn.textContent='Enregistrer & Tester'; btn.disabled=false;}
   });
 }
 
-// ── CONFIRMATION ──
-function showConfirm(title, message, onConfirm) {
-  const html = `
-  <div class="confirm-dialog">
-    <div class="confirm-title">${title}</div>
-    <p>${message}</p>
-    <div class="btn-row">
-      <button class="btn btn-ghost" id="cCancel">Annuler</button>
-      <button class="btn btn-danger" id="cConfirm">Confirmer</button>
-    </div>
-  </div>`;
-  const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay center';
-  overlay.id = 'confirmOverlay';
-  overlay.innerHTML = html;
-  app.appendChild(overlay);
-  overlay.querySelector('#cCancel').addEventListener('click', () => overlay.remove());
-  overlay.querySelector('#cConfirm').addEventListener('click', () => { overlay.remove(); onConfirm(); });
+function showConfirm(title,msg,onConfirm) {
+  const o=document.createElement('div'); o.className='modal-overlay center'; o.id='confirmOverlay';
+  o.innerHTML=`<div class="confirm-dialog"><div class="confirm-title">${title}</div><p>${msg}</p><div class="btn-row"><button class="btn btn-ghost" id="cCancel">Annuler</button><button class="btn btn-danger" id="cConfirm">Confirmer</button></div></div>`;
+  app.appendChild(o);
+  o.querySelector('#cCancel').addEventListener('click',()=>o.remove());
+  o.querySelector('#cConfirm').addEventListener('click',()=>{ o.remove(); onConfirm(); });
 }
 
-// ── TOAST ──
 function showToast(msg) {
-  const t = document.createElement('div');
-  t.className = 'toast'; t.textContent = msg;
-  app.appendChild(t);
-  setTimeout(() => t.remove(), 2700);
+  const t=document.createElement('div'); t.className='toast'; t.textContent=msg;
+  app.appendChild(t); setTimeout(()=>t.remove(),2700);
 }
 
 // ═══════════════════════════════════════════════════════
 //  DÉMARRAGE
 // ═══════════════════════════════════════════════════════
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(() => {});
-}
-
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 loadLocal();
 syncAllToShopping();
 render();
-
-if (state.settings.token && state.settings.gistId) {
-  syncFromGist().then(() => render());
-}
+if (state.settings.token && state.settings.gistId) syncFromGist().then(()=>render());
 </script>
 </body>
 </html>
