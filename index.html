@@ -1134,8 +1134,13 @@ if (state.settings.token && state.settings.gistId) syncFromGist().then(()=>rende
 
 // Synchro automatique quand on revient sur l'appli
 function autoSync() {
-  if (state.settings.token && state.settings.gistId)
-    syncFromGist().then(ok => { if (ok) render(); });
+  if (!state.settings.token || !state.settings.gistId) return;
+  const before = JSON.stringify({i: state.items, s: state.shopping});
+  syncFromGist().then(ok => {
+    if (!ok) { showToast('⚠ Synchro échouée — vérif. connexion'); return; }
+    const after = JSON.stringify({i: state.items, s: state.shopping});
+    if (after !== before) { render(); showToast('✓ Grimoire mis à jour'); }
+  });
 }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') autoSync(); });
 window.addEventListener('focus', autoSync);
