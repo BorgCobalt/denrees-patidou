@@ -497,7 +497,8 @@ async function syncFromGist() {
   try {
     state.syncStatus = 'syncing'; renderSyncBadge();
     const r = await fetch(`https://api.github.com/gists/${state.settings.gistId}`, {
-      headers:{ 'Authorization':`token ${state.settings.token}`, 'Accept':'application/vnd.github.v3+json' }
+      headers:{ 'Authorization':`token ${state.settings.token}`, 'Accept':'application/vnd.github.v3+json' },
+      cache: 'no-store'
     });
     if (!r.ok) throw new Error(r.status);
     const gist = await r.json();
@@ -1132,11 +1133,14 @@ render();
 if (state.settings.token && state.settings.gistId) syncFromGist().then(()=>render());
 
 // Synchro automatique quand on revient sur l'appli
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && state.settings.token && state.settings.gistId) {
+function autoSync() {
+  if (state.settings.token && state.settings.gistId)
     syncFromGist().then(ok => { if (ok) render(); });
-  }
-});
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') autoSync(); });
+window.addEventListener('focus', autoSync);
+// Polling toutes les 45s en filet de sécurité
+setInterval(autoSync, 45000);
 </script>
 </body>
 </html>
