@@ -1080,8 +1080,11 @@ function showSettingsModal() {
     <div class="form-group"><label class="form-label">Token GitHub (portée gist)</label>
       <input class="form-input" id="fToken" type="password" value="${state.settings.token}" placeholder="ghp_…" autocomplete="off"></div>
     <div class="form-group"><label class="form-label">ID du Grimoire Partagé</label>
-      <input class="form-input" id="fGistId" value="${state.settings.gistId}" placeholder="laisser vide = créer automatiquement" autocomplete="off">
-      ${has?`<button class="copy-btn" id="copyGist">Copier cet ID pour l'autre téléphone</button>`:''}
+      <div style="display:flex;gap:8px">
+        <input class="form-input" id="fGistId" value="${state.settings.gistId}" placeholder="laisser vide = créer automatiquement" autocomplete="off" style="flex:1">
+        <button class="copy-btn" id="clearGist" style="flex-shrink:0;padding:6px 10px;font-size:13px">✕ Effacer</button>
+      </div>
+      ${has?`<button class="copy-btn" id="copyGist" style="margin-top:4px">Copier cet ID pour l'autre téléphone</button>`:''}
       <div class="form-hint">Les deux téléphones doivent avoir le <strong>même</strong> Gist ID.</div>
     </div>
     ${state.lastSync?`<div class="form-hint" style="text-align:center">Dernière synchro : ${formatLastSync(state.lastSync)}</div>`:''}
@@ -1094,6 +1097,8 @@ function showSettingsModal() {
   document.getElementById('mCancel').addEventListener('click',closeModal);
   const cg=document.getElementById('copyGist');
   if(cg) cg.addEventListener('click',()=>navigator.clipboard.writeText(state.settings.gistId).then(()=>showToast('ID copié ✓')));
+  const clg=document.getElementById('clearGist');
+  if(clg) clg.addEventListener('click',()=>{ document.getElementById('fGistId').value=''; });
   document.getElementById('mSave').addEventListener('click',async()=>{
     const token=document.getElementById('fToken').value.trim(); if(!token){showToast('Token manquant ⚠');return;}
     const gi=document.getElementById('fGistId'); let gistId=gi?gi.value.trim():state.settings.gistId;
