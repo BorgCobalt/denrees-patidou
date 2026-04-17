@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <circle cx="256" cy="256" r="256" fill="#1e0808"/>
+  <!-- Book spine -->
+  <rect x="95" y="105" width="52" height="302" rx="10" fill="#4a0f0f"/>
+  <rect x="95" y="105" width="52" height="302" rx="10" fill="none" stroke="#c9a84c" stroke-width="3"/>
+  <!-- Book cover body -->
+  <rect x="135" y="95" width="285" height="322" rx="14" fill="#3d1515"/>
+  <rect x="135" y="95" width="285" height="322" rx="14" fill="none" stroke="#c9a84c" stroke-width="5"/>
+  <!-- Inner border frame -->
+  <rect x="158" y="118" width="239" height="276" rx="8" fill="none" stroke="#8b6914" stroke-width="2.5"/>
+  <!-- Pages right edge -->
+  <rect x="413" y="110" width="16" height="292" rx="4" fill="#f5e6c8" opacity="0.55"/>
+  <!-- Top ornament: 4-pointed star -->
+  <polygon points="277,138 284,156 302,156 288,167 293,185 277,174 261,185 266,167 252,156 270,156" fill="#c9a84c"/>
+  <!-- Central flask symbol -->
+  <!-- Flask neck -->
+  <rect x="248" y="220" width="32" height="28" rx="6" fill="#6b1515" stroke="#c9a84c" stroke-width="2"/>
+  <!-- Flask body -->
+  <ellipse cx="264" cy="310" rx="52" ry="48" fill="#6b1515" stroke="#c9a84c" stroke-width="2.5"/>
+  <!-- Flask liquid fill -->
+  <ellipse cx="264" cy="325" rx="42" ry="28" fill="#8b2020" opacity="0.8"/>
+  <!-- Flask sparkle -->
+  <circle cx="248" cy="295" r="6" fill="#e8c96d" opacity="0.7"/>
+  <circle cx="270" cy="285" r="4" fill="#f5e6c8" opacity="0.5"/>
+  <!-- Bottom ornament line -->
+  <line x1="165" y1="380" x2="395" y2="380" stroke="#8b6914" stroke-width="2"/>
+  <polygon points="277,372 284,385 277,390 270,385" fill="#c9a84c"/>
+</svg>

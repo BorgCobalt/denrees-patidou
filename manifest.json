@@ -1,0 +1,18 @@
+{
+  "name": "Denrées du Patidou",
+  "short_name": "Patidou",
+  "description": "Grimoire des stocks du foyer",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1e0808",
+  "theme_color": "#1e0808",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
