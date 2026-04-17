@@ -722,9 +722,8 @@ function spawnCritters() {
     const cards = container.querySelectorAll('.zone-card,.subzone-card');
     if (cards.length < 2) return;
     const n = cards.length;
-    const lb = startWalker(container, 'ladybug',  makeLadybugSVG(),  0.28, 0);
-    const hg = startWalker(container, 'hedgehog', makeHedgehogSVG(), 0.17, Math.min(2, n-1));
-    _critters = [lb, hg];
+    const lb = startWalker(container, 'ladybug', makeLadybugSVG(), 0.28, 0);
+    _critters = [lb];
   }, 150);
 }
 
