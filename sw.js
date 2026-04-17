@@ -1,4 +1,4 @@
-const CACHE = 'denrees-patidou-v1';
+const CACHE = 'denrees-patidou-v2';
 const ASSETS = ['./index.html', './manifest.json', './icon.svg',
   'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap'];
 
