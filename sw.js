@@ -1,6 +1,6 @@
-const CACHE = 'denrees-patidou-v2';
+const CACHE = 'denrees-patidou-v3';
 const ASSETS = ['./index.html', './manifest.json', './icon.svg',
-  'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap'];
+  'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=UnifrakturMaguntia&display=swap'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS).catch(() => {})));
@@ -8,10 +8,13 @@ self.addEventListener('install', e => {
 });
 
 self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys =>
-    Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-  ));
-  self.clients.claim();
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
+     .then(() => self.clients.matchAll())
+     .then(clients => clients.forEach(c => c.postMessage({ type: 'RELOAD' })))
+  );
 });
 
 self.addEventListener('fetch', e => {
