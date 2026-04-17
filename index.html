@@ -1130,6 +1130,13 @@ loadLocal();
 syncAllToShopping();
 render();
 if (state.settings.token && state.settings.gistId) syncFromGist().then(()=>render());
+
+// Synchro automatique quand on revient sur l'appli
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && state.settings.token && state.settings.gistId) {
+    syncFromGist().then(ok => { if (ok) render(); });
+  }
+});
 </script>
 </body>
 </html>
