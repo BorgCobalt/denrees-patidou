@@ -860,6 +860,7 @@ function renderSubzonesPage() {
   app.innerHTML = buildShell(`${zConf.icon} ${state.zone}`);
   attachShellEvents();
   const c=document.getElementById('mainContent');
+  const orphans=state.items.filter(i=>i.zone===state.zone&&!zConf.subzones.includes(i.subzone));
   c.innerHTML = `<div class="subzone-list">${zConf.subzones.map(sz=>{
     const h=subzoneHealth(state.zone,sz), cnt=state.items.filter(i=>i.zone===state.zone&&i.subzone===sz).length;
     return `<div class="subzone-card" data-sz="${sz}">
@@ -873,7 +874,15 @@ function renderSubzonesPage() {
       </div>
       ${h.alerts?`<div class="subzone-alert">⚠</div>`:`<div class="subzone-arrow">▶</div>`}
     </div>`;
-  }).join('')}</div>`;
+  }).join('')}
+  ${orphans.length?`<div class="subzone-card" data-sz="__orphan__" style="border-color:var(--critical-bar);background:var(--depleted-bg)">
+    <div class="subzone-info">
+      <div class="subzone-name" style="color:var(--depleted-text)">Denrées non classées</div>
+      <div class="subzone-count">${orphans.length} denrée${orphans.length!==1?'s':''} — cliquez pour réaffecter</div>
+    </div>
+    <div class="subzone-alert">⚠</div>
+  </div>`:''}
+  </div>`;
   document.querySelectorAll('.subzone-card[data-sz]').forEach(el=>{
     el.addEventListener('click',()=>{ state.subzone=el.dataset.sz; state.view='items'; state.sort='default'; render(); });
   });
@@ -896,10 +905,13 @@ function sortedItems(items) {
 // ── ITEMS ──
 function renderItemsPage() {
   const zConf=ZONES_CONFIG.find(z=>z.name===state.zone);
-  app.innerHTML = buildShell(state.subzone);
+  const isOrphan = state.subzone === '__orphan__';
+  app.innerHTML = buildShell(isOrphan ? '⚠ Non classées' : state.subzone);
   attachShellEvents();
   const c=document.getElementById('mainContent');
-  const rawItems=state.items.filter(i=>i.zone===state.zone&&i.subzone===state.subzone);
+  const rawItems = isOrphan
+    ? state.items.filter(i=>i.zone===state.zone&&!(zConf?.subzones||[]).includes(i.subzone))
+    : state.items.filter(i=>i.zone===state.zone&&i.subzone===state.subzone);
   const items=sortedItems(rawItems);
   const hasDlc = rawItems.some(i=>i.dlc);
   // Barre de tri
@@ -932,10 +944,12 @@ function renderItemsPage() {
       </div>`;
     }).join('')}</div>`;
   }
-  const fab=document.createElement('button');
-  fab.className='fab'; fab.innerHTML='✦';
-  app.appendChild(fab);
-  fab.addEventListener('click',()=>showAddItemModal(state.zone,state.subzone));
+  if (!isOrphan) {
+    const fab=document.createElement('button');
+    fab.className='fab'; fab.innerHTML='✦';
+    app.appendChild(fab);
+    fab.addEventListener('click',()=>showAddItemModal(state.zone,state.subzone));
+  }
   document.querySelectorAll('.sort-btn[data-sort]').forEach(btn=>{
     btn.addEventListener('click',()=>{ state.sort=btn.dataset.sort; renderItemsPage(); });
   });
@@ -1122,11 +1136,15 @@ function showEditItemModal(itemId) {
   const inUse = parseInt(item.inUse) || 0;
   const thresh = item.alertThreshold || 20;
   const isCuisine = (item.zone === 'Cuisine');
+  const zConf2 = ZONES_CONFIG.find(z=>z.name===item.zone);
+  const subzoneOpts = zConf2 ? zConf2.subzones.map(sz=>`<option value="${sz}" ${item.subzone===sz?'selected':''}>${sz}</option>`).join('') : `<option value="${item.subzone}">${item.subzone||'?'}</option>`;
   openModal(`
   <div class="modal-header"><div class="modal-title">⚗ ${item.name}</div><button class="modal-close" id="mClose">✕</button></div>
   <div class="modal-body">
     <div class="form-group"><label class="form-label">Nom</label>
       <input class="form-input" id="fName" value="${item.name}" autocomplete="off"></div>
+    <div class="form-group"><label class="form-label">Sous-catégorie</label>
+      <select class="form-select" id="fSubzone">${subzoneOpts}</select></div>
     <div class="form-group">
       <label class="form-label">Quantité disponible</label>
       ${stepperHTML('qty', qty, '')}
@@ -1161,10 +1179,11 @@ function showEditItemModal(itemId) {
   });
   document.getElementById('mSave').addEventListener('click', () => {
     const name = document.getElementById('fName').value.trim(); if (!name) return;
-    item.name  = name;
-    item.qty   = parseInt(document.getElementById('qtyHidden').value)   || 0;
-    item.inUse = parseInt(document.getElementById('inUseHidden').value) || 0;
-    item.unit  = document.getElementById('fUnit').value.trim();
+    item.name    = name;
+    item.subzone = document.getElementById('fSubzone').value || item.subzone;
+    item.qty     = parseInt(document.getElementById('qtyHidden').value)   || 0;
+    item.inUse   = parseInt(document.getElementById('inUseHidden').value) || 0;
+    item.unit    = document.getElementById('fUnit').value.trim();
     item.level = parseInt(document.getElementById('fLevel').value);
     item.alertThreshold = parseInt(document.getElementById('fThresh').value);
     if (isCuisine) item.dlc = document.getElementById('fDlc')?.value || '';
