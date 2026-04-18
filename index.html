@@ -872,7 +872,7 @@ function renderSubzonesPage() {
         <div class="subzone-health-bar-bg"><div class="subzone-health-fill" style="width:${h.pct}%;background:${healthColor(h.pct)}"></div></div>
         <div class="subzone-health-label">${h.pct}%</div>
       </div>
-      ${h.alerts?`<div class="subzone-alert">⚠</div>`:`<div class="subzone-arrow">▶</div>`}
+      ${h.alerts?`<div class="zone-alert-badge" style="position:static;width:20px;height:20px;font-size:10px;flex-shrink:0">${h.alerts}</div>`:`<div class="subzone-arrow">▶</div>`}
     </div>`;
   }).join('')}
   ${orphans.length?`<div class="subzone-card" data-sz="__orphan__" style="border-color:var(--critical-bar);background:var(--depleted-bg)">
