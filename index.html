@@ -437,6 +437,22 @@ html, body {
 .confirm-dialog .confirm-title { font-family: 'Cinzel', serif; font-size: 16px; color: var(--parchment); font-weight: 700; }
 .confirm-dialog .btn-row { display: flex; gap: 10px; }
 
+/* ── BARRE DE TRI ── */
+.sort-bar {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px;
+}
+.sort-btn {
+  background: var(--bg-raised); border: 1px solid var(--gold-border);
+  color: var(--parchment-muted); font-family: 'Crimson Text', serif;
+  font-size: 12px; padding: 4px 10px; border-radius: 14px;
+  cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.sort-btn.active {
+  background: var(--crimson); color: var(--gold-light);
+  border-color: var(--crimson-light); font-weight: 600;
+}
+.sort-btn:active { opacity: 0.8; }
+
 /* ── DLC BADGE ── */
 .dlc-badge {
   display: inline-flex; align-items: center; gap: 4px;
@@ -480,6 +496,7 @@ let state = {
   items:[], shopping:[],
   settings:{token:'',gistId:''},
   syncStatus:'idle', lastSync:null,
+  sort: 'default', // 'default' | 'level_asc' | 'level_desc' | 'dlc'
 };
 
 // ═══════════════════════════════════════════════════════
@@ -858,9 +875,22 @@ function renderSubzonesPage() {
     </div>`;
   }).join('')}</div>`;
   document.querySelectorAll('.subzone-card[data-sz]').forEach(el=>{
-    el.addEventListener('click',()=>{ state.subzone=el.dataset.sz; state.view='items'; render(); });
+    el.addEventListener('click',()=>{ state.subzone=el.dataset.sz; state.view='items'; state.sort='default'; render(); });
   });
   spawnCritters();
+}
+
+function sortedItems(items) {
+  const copy = [...items];
+  if (state.sort === 'level_asc')  return copy.sort((a,b) => getPercent(a) - getPercent(b));
+  if (state.sort === 'level_desc') return copy.sort((a,b) => getPercent(b) - getPercent(a));
+  if (state.sort === 'dlc') return copy.sort((a,b) => {
+    if (!a.dlc && !b.dlc) return 0;
+    if (!a.dlc) return 1;
+    if (!b.dlc) return -1;
+    return new Date(a.dlc) - new Date(b.dlc);
+  });
+  return copy; // default
 }
 
 // ── ITEMS ──
@@ -869,11 +899,21 @@ function renderItemsPage() {
   app.innerHTML = buildShell(state.subzone);
   attachShellEvents();
   const c=document.getElementById('mainContent');
-  const items=state.items.filter(i=>i.zone===state.zone&&i.subzone===state.subzone);
-  if (!items.length) {
+  const rawItems=state.items.filter(i=>i.zone===state.zone&&i.subzone===state.subzone);
+  const items=sortedItems(rawItems);
+  const hasDlc = rawItems.some(i=>i.dlc);
+  // Barre de tri
+  const sortBar = rawItems.length > 1 ? `<div class="sort-bar">
+    <button class="sort-btn ${state.sort==='default'?'active':''}"   data-sort="default">Par défaut</button>
+    <button class="sort-btn ${state.sort==='level_asc'?'active':''}" data-sort="level_asc">Niveau ↑</button>
+    <button class="sort-btn ${state.sort==='level_desc'?'active':''}"data-sort="level_desc">Niveau ↓</button>
+    ${hasDlc?`<button class="sort-btn ${state.sort==='dlc'?'active':''}" data-sort="dlc">📅 DLC</button>`:''}
+  </div>` : '';
+
+  if (!rawItems.length) {
     c.innerHTML=`<div class="empty-state"><span class="icon">🪄</span>Aucune denrée encore inscrite.<br><br><em>Appuyez sur ✦ pour en ajouter.</em></div>`;
   } else {
-    c.innerHTML=`<div class="item-list">${items.map(item=>{
+    c.innerHTML= sortBar + `<div class="item-list">${items.map(item=>{
       const s=getStatus(item), pct=getPercent(item);
       return `<div class="item-card ${s==='depleted'?'depleted':''}" data-id="${item.id}">
         <div class="item-card-top">
@@ -896,6 +936,9 @@ function renderItemsPage() {
   fab.className='fab'; fab.innerHTML='✦';
   app.appendChild(fab);
   fab.addEventListener('click',()=>showAddItemModal(state.zone,state.subzone));
+  document.querySelectorAll('.sort-btn[data-sort]').forEach(btn=>{
+    btn.addEventListener('click',()=>{ state.sort=btn.dataset.sort; renderItemsPage(); });
+  });
   document.querySelectorAll('.item-card[data-id]').forEach(el=>{
     el.addEventListener('click',()=>showEditItemModal(el.dataset.id));
   });
