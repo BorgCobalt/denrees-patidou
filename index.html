@@ -437,6 +437,16 @@ html, body {
 .confirm-dialog .confirm-title { font-family: 'Cinzel', serif; font-size: 16px; color: var(--parchment); font-weight: 700; }
 .confirm-dialog .btn-row { display: flex; gap: 10px; }
 
+/* ── DLC BADGE ── */
+.dlc-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-family: 'Crimson Text', serif; font-style: italic;
+  padding: 2px 8px; border-radius: 8px; margin-top: 4px;
+}
+.dlc-ok       { background: var(--ok);       color: var(--ok-text); }
+.dlc-soon     { background: var(--low);       color: var(--low-text); }
+.dlc-expired  { background: var(--depleted-bg); color: var(--depleted-text); font-weight: bold; }
+
 /* ── CRÉATURES AMBULANTES ── */
 .critter-walker {
   position: absolute; z-index: 50; pointer-events: none;
@@ -870,7 +880,10 @@ function renderItemsPage() {
           <div class="item-name">${item.name}</div>
           <span class="item-status-badge ${statusBadgeClass(s)}">${statusLabel(s)}</span>
         </div>
-        <div class="item-qty">${item.qty||0} ${item.unit||''} — contenant : ${getPercent(item)}%</div>
+        <div class="item-qty">
+          ${item.qty||0}${item.unit?' '+item.unit:''} dispo${item.inUse?' · '+item.inUse+' en cours':''}
+        </div>
+        ${item.dlc ? dlcHTML(item.dlc) : ''}
         <div class="item-bar-bg"><div class="item-bar-fill ${statusBarClass(s)}" style="width:${s==='depleted'?0:(pct??100)}%"></div></div>
         <div class="item-bar-labels">
           <span>${pct!==null?pct+'%':'—'}</span>
@@ -940,28 +953,46 @@ function openModal(html,center=false) {
 }
 function closeModal() { const m=document.getElementById('modalOverlay'); if(m)m.remove(); }
 
-function qtyStepperHTML(val, unit) {
+// Stepper générique : prefix = 'qty' | 'inUse'
+function stepperHTML(prefix, val, placeholder='') {
   return `<div style="display:flex;align-items:center;gap:10px;margin-top:4px">
-    <button class="quick-set-btn" id="qtyMinus" style="width:40px;font-size:20px;padding:4px">−</button>
-    <span id="qtyDisplay" style="font-family:'Cinzel',serif;font-size:18px;font-weight:700;min-width:32px;text-align:center;color:var(--parchment)">${val}</span>
-    <button class="quick-set-btn" id="qtyPlus"  style="width:40px;font-size:20px;padding:4px">+</button>
-    <input class="form-input" id="fUnit" value="${unit}" placeholder="bouteilles, tubes…" autocomplete="off" style="flex:1">
+    <button class="quick-set-btn" data-step="${prefix}" data-dir="-1" style="width:40px;font-size:20px;padding:4px">−</button>
+    <span id="${prefix}Display" style="font-family:'Cinzel',serif;font-size:18px;font-weight:700;min-width:32px;text-align:center;color:var(--parchment)">${val}</span>
+    <button class="quick-set-btn" data-step="${prefix}" data-dir="1"  style="width:40px;font-size:20px;padding:4px">+</button>
+    <input type="hidden" id="${prefix}Hidden" value="${val}">
+    ${placeholder ? `<input class="form-input" id="fUnit" value="${placeholder}" placeholder="bouteilles, tubes…" autocomplete="off" style="flex:1">` : ''}
   </div>`;
 }
 
-function attachQtyStepper(initVal) {
-  let v = initVal;
-  document.getElementById('fQtyHidden').value = v;
-  document.getElementById('qtyMinus').addEventListener('click', () => {
-    v = Math.max(0, v - 1);
-    document.getElementById('qtyDisplay').textContent = v;
-    document.getElementById('fQtyHidden').value = v;
+function attachSteppers() {
+  document.querySelectorAll('[data-step]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const prefix = btn.dataset.step;
+      const hidden = document.getElementById(prefix + 'Hidden');
+      const display = document.getElementById(prefix + 'Display');
+      let v = Math.max(0, parseInt(hidden.value || 0) + parseInt(btn.dataset.dir));
+      hidden.value = v;
+      display.textContent = v;
+    });
   });
-  document.getElementById('qtyPlus').addEventListener('click', () => {
-    v = v + 1;
-    document.getElementById('qtyDisplay').textContent = v;
-    document.getElementById('fQtyHidden').value = v;
-  });
+}
+
+// DLC helpers
+function dlcHTML(dlcVal) {
+  if (!dlcVal) return '';
+  const d = new Date(dlcVal), now = new Date();
+  const days = Math.floor((d - now) / 86400000);
+  if (days < 0)  return `<span class="dlc-badge dlc-expired">⚠ Périmé depuis ${Math.abs(days)}j</span>`;
+  if (days <= 7) return `<span class="dlc-badge dlc-soon">⏳ DLC dans ${days}j — ${d.toLocaleDateString('fr-FR')}</span>`;
+  return `<span class="dlc-badge dlc-ok">📅 DLC : ${d.toLocaleDateString('fr-FR')}</span>`;
+}
+
+function dlcFieldHTML(val='') {
+  return `<div class="form-group">
+    <label class="form-label">Date limite de consommation</label>
+    <input type="date" class="form-input" id="fDlc" value="${val}">
+    ${val ? `<button class="copy-btn" id="clearDlc" style="margin-top:4px">✕ Effacer la date</button>` : ''}
+  </div>`;
 }
 
 function levelSliderHTML(level, threshold) {
@@ -997,6 +1028,7 @@ function attachSliders() {
 }
 
 function showAddItemModal(zone, subzone) {
+  const isCuisine = (zone === 'Cuisine');
   openModal(`
   <div class="modal-header"><div class="modal-title">✦ Nouvelle Denrée</div><button class="modal-close" id="mClose">✕</button></div>
   <div class="modal-body">
@@ -1004,10 +1036,17 @@ function showAddItemModal(zone, subzone) {
       <input class="form-input" id="fName" placeholder="ex: Bain de bouche, Sel…" autocomplete="off"></div>
     <div class="form-group">
       <label class="form-label">Quantité disponible</label>
-      <input type="hidden" id="fQtyHidden" value="1">
-      ${qtyStepperHTML(1, '')}
+      ${stepperHTML('qty', 1, '')}
     </div>
+    <div class="form-group">
+      <label class="form-label">En cours d'utilisation</label>
+      ${stepperHTML('inUse', 0)}
+      <div class="form-hint">Nombre d'unités déjà ouvertes/en cours.</div>
+    </div>
+    <div class="form-group"><label class="form-label">Unité</label>
+      <input class="form-input" id="fUnit" placeholder="bouteilles, tubes, sachets…" autocomplete="off"></div>
     ${levelSliderHTML(100, 20)}
+    ${isCuisine ? dlcFieldHTML() : ''}
   </div>
   <div class="modal-footer">
     <button class="btn btn-ghost" id="mCancel">Annuler</button>
@@ -1015,27 +1054,31 @@ function showAddItemModal(zone, subzone) {
   </div>`);
   document.getElementById('mClose').addEventListener('click', closeModal);
   document.getElementById('mCancel').addEventListener('click', closeModal);
-  attachQtyStepper(1);
-  attachSliders();
+  attachSteppers(); attachSliders();
   document.getElementById('mSave').addEventListener('click', () => {
     const name = document.getElementById('fName').value.trim();
     if (!name) { document.getElementById('fName').focus(); return; }
     const item = { id:uid(), zone, subzone, name,
-      qty: parseInt(document.getElementById('fQtyHidden').value) || 0,
-      unit: document.getElementById('fUnit').value.trim(),
+      qty:   parseInt(document.getElementById('qtyHidden').value)   || 0,
+      inUse: parseInt(document.getElementById('inUseHidden').value) || 0,
+      unit:  document.getElementById('fUnit').value.trim(),
       level: parseInt(document.getElementById('fLevel').value),
-      alertThreshold: parseInt(document.getElementById('fThresh').value) };
+      alertThreshold: parseInt(document.getElementById('fThresh').value),
+      dlc: isCuisine ? (document.getElementById('fDlc')?.value || '') : ''
+    };
     state.items.push(item); syncToShoppingList(item); saveLocal(); scheduleSyncToGist();
     closeModal(); render(); showToast(`"${name}" inscrit ✦`);
   });
 }
 
 function showEditItemModal(itemId) {
-  const item = state.items.find(i => i.id === itemId); if (!item) return;
-  const s = getStatus(item);
-  const currentLevel = item.level !== undefined ? item.level : getPercent(item) ?? 100;
-  const currentQty = parseInt(item.qty) || 0;
-  const currentThresh = item.alertThreshold || 20;
+  const item  = state.items.find(i => i.id === itemId); if (!item) return;
+  const s     = getStatus(item);
+  const level = item.level !== undefined ? item.level : getPercent(item) ?? 100;
+  const qty   = parseInt(item.qty)   || 0;
+  const inUse = parseInt(item.inUse) || 0;
+  const thresh = item.alertThreshold || 20;
+  const isCuisine = (item.zone === 'Cuisine');
   openModal(`
   <div class="modal-header"><div class="modal-title">⚗ ${item.name}</div><button class="modal-close" id="mClose">✕</button></div>
   <div class="modal-body">
@@ -1043,10 +1086,17 @@ function showEditItemModal(itemId) {
       <input class="form-input" id="fName" value="${item.name}" autocomplete="off"></div>
     <div class="form-group">
       <label class="form-label">Quantité disponible</label>
-      <input type="hidden" id="fQtyHidden" value="${currentQty}">
-      ${qtyStepperHTML(currentQty, item.unit||'')}
+      ${stepperHTML('qty', qty, '')}
     </div>
-    ${levelSliderHTML(currentLevel, currentThresh)}
+    <div class="form-group">
+      <label class="form-label">En cours d'utilisation</label>
+      ${stepperHTML('inUse', inUse)}
+      <div class="form-hint">Nombre d'unités déjà ouvertes/en cours.</div>
+    </div>
+    <div class="form-group"><label class="form-label">Unité</label>
+      <input class="form-input" id="fUnit" value="${item.unit||''}" autocomplete="off"></div>
+    ${levelSliderHTML(level, thresh)}
+    ${isCuisine ? dlcFieldHTML(item.dlc||'') : ''}
     ${s==='depleted'?`<div style="text-align:center;color:var(--depleted-text);font-style:italic;font-size:13px;padding:4px">⚠ Épuisé — figure dans la liste de courses.</div>`:''}
   </div>
   <div class="modal-footer" style="flex-wrap:wrap;gap:8px">
@@ -1056,11 +1106,12 @@ function showEditItemModal(itemId) {
   </div>`);
   document.getElementById('mClose').addEventListener('click', closeModal);
   document.getElementById('mCancel').addEventListener('click', closeModal);
-  attachQtyStepper(currentQty);
-  attachSliders();
+  attachSteppers(); attachSliders();
+  const clearDlc = document.getElementById('clearDlc');
+  if (clearDlc) clearDlc.addEventListener('click', () => { document.getElementById('fDlc').value = ''; clearDlc.remove(); });
   document.getElementById('mDelete').addEventListener('click', () => {
     showConfirm(`Supprimer "${item.name}" ?`, 'Cette denrée sera effacée définitivement.', () => {
-      state.items = state.items.filter(i => i.id !== itemId);
+      state.items   = state.items.filter(i => i.id !== itemId);
       state.shopping = state.shopping.filter(s => s.itemId !== itemId);
       saveLocal(); scheduleSyncToGist(); closeModal(); render(); showToast(`"${item.name}" effacé`);
     });
@@ -1068,10 +1119,12 @@ function showEditItemModal(itemId) {
   document.getElementById('mSave').addEventListener('click', () => {
     const name = document.getElementById('fName').value.trim(); if (!name) return;
     item.name  = name;
-    item.qty   = parseInt(document.getElementById('fQtyHidden').value) || 0;
+    item.qty   = parseInt(document.getElementById('qtyHidden').value)   || 0;
+    item.inUse = parseInt(document.getElementById('inUseHidden').value) || 0;
     item.unit  = document.getElementById('fUnit').value.trim();
     item.level = parseInt(document.getElementById('fLevel').value);
     item.alertThreshold = parseInt(document.getElementById('fThresh').value);
+    if (isCuisine) item.dlc = document.getElementById('fDlc')?.value || '';
     delete item.maxQty;
     syncToShoppingList(item); removeFromShoppingIfRestocked(item);
     saveLocal(); scheduleSyncToGist(); closeModal(); render(); showToast('Denrée mise à jour ✓');
