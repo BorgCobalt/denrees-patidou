@@ -595,14 +595,14 @@ function zoneHealth(zoneName) {
   const items = state.items.filter(i=>i.zone===zoneName);
   if (!items.length) return {pct:100,alerts:0,depleted:0};
   let total=0,alerts=0,dep=0;
-  items.forEach(i=>{ total+=(getPercent(i)??100); const s=getStatus(i); if(s==='depleted')dep++; else if(s!=='ok')alerts++; });
+  items.forEach(i=>{ total+=(getPercent(i)??100); const s=getStatus(i); if(s==='depleted')dep++; else if(s!=='ok'&&!i.alertSeen)alerts++; });
   return {pct:Math.round(total/items.length),alerts,depleted:dep};
 }
 function subzoneHealth(zoneName,subzoneName) {
   const items = state.items.filter(i=>i.zone===zoneName&&i.subzone===subzoneName);
   if (!items.length) return {pct:100,alerts:0};
   let total=0,alerts=0;
-  items.forEach(i=>{ total+=(getPercent(i)??100); if(getStatus(i)!=='ok')alerts++; });
+  items.forEach(i=>{ total+=(getPercent(i)??100); const s=getStatus(i); if(s!=='ok'&&s!=='depleted'&&!i.alertSeen)alerts++; });
   return {pct:Math.round(total/items.length),alerts};
 }
 function healthColor(pct) {
@@ -837,7 +837,7 @@ function renderZonesPage() {
     <div class="ornament">✦ ✧ ✦</div>
     <div class="zones-grid">
       ${ZONES_CONFIG.map(z=>{
-        const h=zoneHealth(z.name), cnt=state.items.filter(i=>i.zone===z.name).length, alertN=h.alerts+h.depleted;
+        const h=zoneHealth(z.name), cnt=state.items.filter(i=>i.zone===z.name).length, alertN=h.alerts;
         return `<div class="zone-card" data-zone="${z.name}">
           ${alertN?`<div class="zone-alert-badge">${alertN}</div>`:''}
           <div class="zone-icon">${z.icon}</div>
@@ -1131,6 +1131,9 @@ function showAddItemModal(zone, subzone) {
 function showEditItemModal(itemId) {
   const item  = state.items.find(i => i.id === itemId); if (!item) return;
   const s     = getStatus(item);
+  if (s !== 'ok' && s !== 'depleted' && !item.alertSeen) {
+    item.alertSeen = true; saveLocal(); scheduleSyncToGist();
+  }
   const level = item.level !== undefined ? item.level : getPercent(item) ?? 100;
   const qty   = parseInt(item.qty)   || 0;
   const inUse = parseInt(item.inUse) || 0;
@@ -1179,8 +1182,9 @@ function showEditItemModal(itemId) {
   });
   document.getElementById('mSave').addEventListener('click', () => {
     const name = document.getElementById('fName').value.trim(); if (!name) return;
-    item.name    = name;
-    item.subzone = document.getElementById('fSubzone').value || item.subzone;
+    item.name      = name;
+    item.alertSeen = false;
+    item.subzone   = document.getElementById('fSubzone').value || item.subzone;
     item.qty     = parseInt(document.getElementById('qtyHidden').value)   || 0;
     item.inUse   = parseInt(document.getElementById('inUseHidden').value) || 0;
     item.unit    = document.getElementById('fUnit').value.trim();
