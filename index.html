@@ -549,17 +549,16 @@ async function createGist(token) {
 // ═══════════════════════════════════════════════════════
 function uid() { return Math.random().toString(36).slice(2)+Date.now().toString(36); }
 function getPercent(item) {
-  // Nouveau système : level direct (0-100)
   if (item.level !== undefined && item.level !== null) return item.level;
-  // Rétrocompat anciens items qty/maxQty
   if (!item.maxQty || item.maxQty <= 0) return 100;
   return Math.min(100, Math.max(0, Math.round((item.qty/item.maxQty)*100)));
 }
 function getStatus(item) {
-  const pct = getPercent(item);
-  if (pct <= 0) return 'depleted';
-  if (pct <= (item.alertThreshold||20)) return 'critical';
-  if (pct <= 40) return 'low';
+  // Épuisé = plus aucune unité disponible
+  if (!item.qty || parseInt(item.qty) <= 0) return 'depleted';
+  const level = getPercent(item);
+  if (level <= (item.alertThreshold||20)) return 'critical';
+  if (level <= 40) return 'low';
   return 'ok';
 }
 function statusLabel(s) { return {ok:'Abondant',low:'Faible',critical:'Critique',depleted:'Épuisé'}[s]||s; }
@@ -871,7 +870,7 @@ function renderItemsPage() {
           <div class="item-name">${item.name}</div>
           <span class="item-status-badge ${statusBadgeClass(s)}">${statusLabel(s)}</span>
         </div>
-        <div class="item-qty">${item.qty||''}${item.qty&&item.unit?' ':''  }${item.unit||''}</div>
+        <div class="item-qty">${item.qty||0} ${item.unit||''} — contenant : ${getPercent(item)}%</div>
         <div class="item-bar-bg"><div class="item-bar-fill ${statusBarClass(s)}" style="width:${s==='depleted'?0:(pct??100)}%"></div></div>
         <div class="item-bar-labels">
           <span>${pct!==null?pct+'%':'—'}</span>
@@ -941,108 +940,113 @@ function openModal(html,center=false) {
 }
 function closeModal() { const m=document.getElementById('modalOverlay'); if(m)m.remove(); }
 
-function levelButtonsHTML(currentLevel) {
-  return `<div class="item-actions" id="levelBtns">
-    <button class="quick-set-btn" data-level="0">🔴 Épuisé</button>
-    <button class="quick-set-btn" data-level="25">25%</button>
-    <button class="quick-set-btn" data-level="50">50%</button>
-    <button class="quick-set-btn" data-level="75">75%</button>
-    <button class="quick-set-btn" data-level="100">✅ Plein</button>
+function qtyStepperHTML(val, unit) {
+  return `<div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+    <button class="quick-set-btn" id="qtyMinus" style="width:40px;font-size:20px;padding:4px">−</button>
+    <span id="qtyDisplay" style="font-family:'Cinzel',serif;font-size:18px;font-weight:700;min-width:32px;text-align:center;color:var(--parchment)">${val}</span>
+    <button class="quick-set-btn" id="qtyPlus"  style="width:40px;font-size:20px;padding:4px">+</button>
+    <input class="form-input" id="fUnit" value="${unit}" placeholder="bouteilles, tubes…" autocomplete="off" style="flex:1">
   </div>`;
 }
 
-function attachLevelButtons(sliderId, displayId) {
-  const slider = document.getElementById(sliderId);
-  const display = document.getElementById(displayId);
-  slider.addEventListener('input', () => { display.textContent = slider.value + '%'; });
-  document.querySelectorAll('#levelBtns .quick-set-btn[data-level]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      slider.value = btn.dataset.level;
-      display.textContent = btn.dataset.level + '%';
-    });
+function attachQtyStepper(initVal) {
+  let v = initVal;
+  document.getElementById('fQtyHidden').value = v;
+  document.getElementById('qtyMinus').addEventListener('click', () => {
+    v = Math.max(0, v - 1);
+    document.getElementById('qtyDisplay').textContent = v;
+    document.getElementById('fQtyHidden').value = v;
+  });
+  document.getElementById('qtyPlus').addEventListener('click', () => {
+    v = v + 1;
+    document.getElementById('qtyDisplay').textContent = v;
+    document.getElementById('fQtyHidden').value = v;
   });
 }
 
-function showAddItemModal(zone,subzone) {
+function levelSliderHTML(level, threshold) {
+  return `
+  <div class="form-group">
+    <label class="form-label">Niveau du contenant — <span id="lvlDisplay">${level}%</span></label>
+    <div class="form-range-row">
+      <input type="range" class="form-range" id="fLevel" min="0" max="100" value="${level}" step="5">
+      <span class="form-range-val" id="lvlVal">${level}%</span>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Seuil d'alerte — <span id="tVal">${threshold}%</span></label>
+    <div class="form-range-row">
+      <input type="range" class="form-range" id="fThresh" min="5" max="80" value="${threshold}" step="5">
+      <span class="form-range-val" id="tValR">${threshold}%</span>
+    </div>
+    <div class="form-hint">Si niveau ≤ seuil → statut Critique ⚠</div>
+  </div>`;
+}
+
+function attachSliders() {
+  const lvl = document.getElementById('fLevel');
+  lvl.addEventListener('input', () => {
+    document.getElementById('lvlDisplay').textContent = lvl.value + '%';
+    document.getElementById('lvlVal').textContent = lvl.value + '%';
+  });
+  const thr = document.getElementById('fThresh');
+  thr.addEventListener('input', () => {
+    document.getElementById('tVal').textContent = thr.value + '%';
+    document.getElementById('tValR').textContent = thr.value + '%';
+  });
+}
+
+function showAddItemModal(zone, subzone) {
   openModal(`
   <div class="modal-header"><div class="modal-title">✦ Nouvelle Denrée</div><button class="modal-close" id="mClose">✕</button></div>
   <div class="modal-body">
     <div class="form-group"><label class="form-label">Nom de la denrée</label>
-      <input class="form-input" id="fName" placeholder="ex: Sel, Shampoing…" autocomplete="off"></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Quantité</label>
-        <input class="form-input" id="fQty" placeholder="ex: 2, 500…" inputmode="decimal"></div>
-      <div class="form-group"><label class="form-label">Unité</label>
-        <input class="form-input" id="fUnit" placeholder="g, mL, bouteilles…" autocomplete="off"></div>
-    </div>
+      <input class="form-input" id="fName" placeholder="ex: Bain de bouche, Sel…" autocomplete="off"></div>
     <div class="form-group">
-      <label class="form-label">Niveau de stock — <span id="lvlDisplay">100%</span></label>
-      <div class="form-range-row">
-        <input type="range" class="form-range" id="fLevel" min="0" max="100" value="100" step="5">
-        <span class="form-range-val" id="lvlDisplay2">100%</span>
-      </div>
-      ${levelButtonsHTML(100)}
+      <label class="form-label">Quantité disponible</label>
+      <input type="hidden" id="fQtyHidden" value="1">
+      ${qtyStepperHTML(1, '')}
     </div>
-    <div class="form-group">
-      <label class="form-label">Seuil d'alerte — <span id="tVal">20%</span></label>
-      <div class="form-range-row">
-        <input type="range" class="form-range" id="fThresh" min="5" max="80" value="20" step="5">
-        <span class="form-range-val" id="tValR">20%</span>
-      </div>
-      <div class="form-hint">En dessous de ce seuil → statut Critique.</div>
-    </div>
+    ${levelSliderHTML(100, 20)}
   </div>
   <div class="modal-footer">
     <button class="btn btn-ghost" id="mCancel">Annuler</button>
     <button class="btn btn-primary" id="mSave">Inscrire au Grimoire</button>
   </div>`);
-  document.getElementById('mClose').addEventListener('click',closeModal);
-  document.getElementById('mCancel').addEventListener('click',closeModal);
-  attachLevelButtons('fLevel','lvlDisplay');
-  const r=document.getElementById('fThresh');
-  r.addEventListener('input',()=>{ document.getElementById('tVal').textContent=r.value+'%'; document.getElementById('tValR').textContent=r.value+'%'; });
-  document.getElementById('mSave').addEventListener('click',()=>{
-    const name=document.getElementById('fName').value.trim(); if(!name){document.getElementById('fName').focus();return;}
-    const item={id:uid(),zone,subzone,name,
-      qty:document.getElementById('fQty').value.trim(),
-      unit:document.getElementById('fUnit').value.trim(),
-      level:parseInt(document.getElementById('fLevel').value),
-      alertThreshold:parseInt(r.value)};
+  document.getElementById('mClose').addEventListener('click', closeModal);
+  document.getElementById('mCancel').addEventListener('click', closeModal);
+  attachQtyStepper(1);
+  attachSliders();
+  document.getElementById('mSave').addEventListener('click', () => {
+    const name = document.getElementById('fName').value.trim();
+    if (!name) { document.getElementById('fName').focus(); return; }
+    const item = { id:uid(), zone, subzone, name,
+      qty: parseInt(document.getElementById('fQtyHidden').value) || 0,
+      unit: document.getElementById('fUnit').value.trim(),
+      level: parseInt(document.getElementById('fLevel').value),
+      alertThreshold: parseInt(document.getElementById('fThresh').value) };
     state.items.push(item); syncToShoppingList(item); saveLocal(); scheduleSyncToGist();
     closeModal(); render(); showToast(`"${name}" inscrit ✦`);
   });
 }
 
 function showEditItemModal(itemId) {
-  const item=state.items.find(i=>i.id===itemId); if(!item)return;
-  const s=getStatus(item);
+  const item = state.items.find(i => i.id === itemId); if (!item) return;
+  const s = getStatus(item);
   const currentLevel = item.level !== undefined ? item.level : getPercent(item) ?? 100;
+  const currentQty = parseInt(item.qty) || 0;
+  const currentThresh = item.alertThreshold || 20;
   openModal(`
   <div class="modal-header"><div class="modal-title">⚗ ${item.name}</div><button class="modal-close" id="mClose">✕</button></div>
   <div class="modal-body">
     <div class="form-group"><label class="form-label">Nom</label>
       <input class="form-input" id="fName" value="${item.name}" autocomplete="off"></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Quantité</label>
-        <input class="form-input" id="fQty" value="${item.qty||''}" placeholder="ex: 2, 500…" inputmode="decimal"></div>
-      <div class="form-group"><label class="form-label">Unité</label>
-        <input class="form-input" id="fUnit" value="${item.unit||''}" autocomplete="off"></div>
-    </div>
     <div class="form-group">
-      <label class="form-label">Niveau de stock — <span id="lvlDisplay">${currentLevel}%</span></label>
-      <div class="form-range-row">
-        <input type="range" class="form-range" id="fLevel" min="0" max="100" value="${currentLevel}" step="5">
-        <span class="form-range-val" id="lvlDisplay2">${currentLevel}%</span>
-      </div>
-      ${levelButtonsHTML(currentLevel)}
+      <label class="form-label">Quantité disponible</label>
+      <input type="hidden" id="fQtyHidden" value="${currentQty}">
+      ${qtyStepperHTML(currentQty, item.unit||'')}
     </div>
-    <div class="form-group">
-      <label class="form-label">Seuil d'alerte — <span id="tVal">${item.alertThreshold||20}%</span></label>
-      <div class="form-range-row">
-        <input type="range" class="form-range" id="fThresh" min="5" max="80" value="${item.alertThreshold||20}" step="5">
-        <span class="form-range-val" id="tValR">${item.alertThreshold||20}%</span>
-      </div>
-    </div>
+    ${levelSliderHTML(currentLevel, currentThresh)}
     ${s==='depleted'?`<div style="text-align:center;color:var(--depleted-text);font-style:italic;font-size:13px;padding:4px">⚠ Épuisé — figure dans la liste de courses.</div>`:''}
   </div>
   <div class="modal-footer" style="flex-wrap:wrap;gap:8px">
@@ -1050,26 +1054,25 @@ function showEditItemModal(itemId) {
     <button class="btn btn-ghost" id="mCancel" style="flex:1">Annuler</button>
     <button class="btn btn-primary" id="mSave" style="flex:2">Sauvegarder</button>
   </div>`);
-  document.getElementById('mClose').addEventListener('click',closeModal);
-  document.getElementById('mCancel').addEventListener('click',closeModal);
-  attachLevelButtons('fLevel','lvlDisplay');
-  const r=document.getElementById('fThresh');
-  r.addEventListener('input',()=>{ document.getElementById('tVal').textContent=r.value+'%'; document.getElementById('tValR').textContent=r.value+'%'; });
-  document.getElementById('mDelete').addEventListener('click',()=>{
-    showConfirm(`Supprimer "${item.name}" ?`,'Cette denrée sera effacée définitivement.',()=>{
-      state.items=state.items.filter(i=>i.id!==itemId);
-      state.shopping=state.shopping.filter(s=>s.itemId!==itemId);
+  document.getElementById('mClose').addEventListener('click', closeModal);
+  document.getElementById('mCancel').addEventListener('click', closeModal);
+  attachQtyStepper(currentQty);
+  attachSliders();
+  document.getElementById('mDelete').addEventListener('click', () => {
+    showConfirm(`Supprimer "${item.name}" ?`, 'Cette denrée sera effacée définitivement.', () => {
+      state.items = state.items.filter(i => i.id !== itemId);
+      state.shopping = state.shopping.filter(s => s.itemId !== itemId);
       saveLocal(); scheduleSyncToGist(); closeModal(); render(); showToast(`"${item.name}" effacé`);
     });
   });
-  document.getElementById('mSave').addEventListener('click',()=>{
-    const name=document.getElementById('fName').value.trim(); if(!name)return;
-    item.name=name;
-    item.qty=document.getElementById('fQty').value.trim();
-    item.unit=document.getElementById('fUnit').value.trim();
-    item.level=parseInt(document.getElementById('fLevel').value);
-    item.alertThreshold=parseInt(r.value);
-    delete item.maxQty; // nettoyage anciens items
+  document.getElementById('mSave').addEventListener('click', () => {
+    const name = document.getElementById('fName').value.trim(); if (!name) return;
+    item.name  = name;
+    item.qty   = parseInt(document.getElementById('fQtyHidden').value) || 0;
+    item.unit  = document.getElementById('fUnit').value.trim();
+    item.level = parseInt(document.getElementById('fLevel').value);
+    item.alertThreshold = parseInt(document.getElementById('fThresh').value);
+    delete item.maxQty;
     syncToShoppingList(item); removeFromShoppingIfRestocked(item);
     saveLocal(); scheduleSyncToGist(); closeModal(); render(); showToast('Denrée mise à jour ✓');
   });
