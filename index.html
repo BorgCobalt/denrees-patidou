@@ -972,11 +972,12 @@ function renderShoppingPage() {
   if (!state.shopping.length) {
     html+=`<div class="shopping-empty"><span class="empty-icon">✨</span>Les étagères sont bien garnies !<br>Aucun manque à signaler.</div>`;
   } else {
+    const qtyLabel = item => (item.sqty && item.sqty > 1) ? `${item.sqty}${item.sunit?' '+item.sunit:''}` : (item.sunit||'');
     const renderItem=item=>`<div class="shopping-item ${item.checked?'checked':''}" data-sid="${item.id}">
       <div class="shopping-checkbox">${item.checked?'✓':''}</div>
       <div class="shopping-item-info">
         <div class="shopping-item-name">${item.name}</div>
-        <div class="shopping-item-meta">${item.zone||''}${item.subzone?' › '+item.subzone:''}</div>
+        <div class="shopping-item-meta">${[item.zone, item.subzone?'› '+item.subzone:'', qtyLabel(item)].filter(Boolean).join(' ')}</div>
       </div>
       <span class="shopping-item-source ${item.source==='manual'?'manual':''}">${item.source==='depleted'?'épuisé':'manuel'}</span>
     </div>`;
@@ -986,10 +987,19 @@ function renderShoppingPage() {
       html+=checked.map(renderItem).join('');
     }
   }
+  html+=`<div style="font-size:11px;color:var(--parchment-muted);text-align:center;font-style:italic;margin-bottom:6px">Appui long pour modifier un article</div>`;
   html+=`<button class="shopping-add-btn" id="addManualBtn">✦ Ajouter manuellement</button>`;
   c.innerHTML=html;
   document.querySelectorAll('.shopping-item[data-sid]').forEach(el=>{
-    el.addEventListener('click',()=>{ const it=state.shopping.find(s=>s.id===el.dataset.sid); if(it){it.checked=!it.checked; saveLocal(); scheduleSyncToGist(); render();} });
+    const it=state.shopping.find(s=>s.id===el.dataset.sid); if(!it) return;
+    let pressTimer, longPressed=false;
+    el.addEventListener('touchstart', ()=>{
+      longPressed=false;
+      pressTimer=setTimeout(()=>{ longPressed=true; showEditShoppingModal(it.id); },500);
+    },{passive:true});
+    el.addEventListener('touchend', e=>{ clearTimeout(pressTimer); if(longPressed){longPressed=false; e.preventDefault();} });
+    el.addEventListener('touchmove', ()=>clearTimeout(pressTimer),{passive:true});
+    el.addEventListener('click', ()=>{ if(longPressed) return; it.checked=!it.checked; saveLocal(); scheduleSyncToGist(); render(); });
   });
   const clr=document.getElementById('clearChecked');
   if(clr) clr.addEventListener('click',()=>{ state.shopping=state.shopping.filter(s=>!s.checked); saveLocal(); scheduleSyncToGist(); render(); });
@@ -1010,12 +1020,12 @@ function openModal(html,center=false) {
 }
 function closeModal() { const m=document.getElementById('modalOverlay'); if(m)m.remove(); }
 
-// Stepper générique : prefix = 'qty' | 'inUse'
-function stepperHTML(prefix, val, placeholder='') {
+// Stepper générique : prefix = 'qty' | 'inUse' | 'sqty'
+function stepperHTML(prefix, val, placeholder='', min=0) {
   return `<div style="display:flex;align-items:center;gap:10px;margin-top:4px">
-    <button class="quick-set-btn" data-step="${prefix}" data-dir="-1" style="width:40px;font-size:20px;padding:4px">−</button>
+    <button class="quick-set-btn" data-step="${prefix}" data-dir="-1" data-min="${min}" style="width:40px;font-size:20px;padding:4px">−</button>
     <span id="${prefix}Display" style="font-family:'Cinzel',serif;font-size:18px;font-weight:700;min-width:32px;text-align:center;color:var(--parchment)">${val}</span>
-    <button class="quick-set-btn" data-step="${prefix}" data-dir="1"  style="width:40px;font-size:20px;padding:4px">+</button>
+    <button class="quick-set-btn" data-step="${prefix}" data-dir="1"  data-min="${min}" style="width:40px;font-size:20px;padding:4px">+</button>
     <input type="hidden" id="${prefix}Hidden" value="${val}">
     ${placeholder ? `<input class="form-input" id="fUnit" value="${placeholder}" placeholder="bouteilles, tubes…" autocomplete="off" style="flex:1">` : ''}
   </div>`;
@@ -1027,7 +1037,8 @@ function attachSteppers() {
       const prefix = btn.dataset.step;
       const hidden = document.getElementById(prefix + 'Hidden');
       const display = document.getElementById(prefix + 'Display');
-      let v = Math.max(0, parseInt(hidden.value || 0) + parseInt(btn.dataset.dir));
+      const min = parseInt(btn.dataset.min || 0);
+      let v = Math.max(min, parseInt(hidden.value || 0) + parseInt(btn.dataset.dir));
       hidden.value = v;
       display.textContent = v;
     });
@@ -1203,6 +1214,16 @@ function showAddManualShoppingModal() {
   <div class="modal-body">
     <div class="form-group"><label class="form-label">Article</label>
       <input class="form-input" id="fName" placeholder="ex: Pain, Café…" autocomplete="off"></div>
+    <div class="form-group">
+      <label class="form-label">Quantité à acheter</label>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+        <button class="quick-set-btn" data-step="sqty" data-dir="-1" data-min="1" style="width:40px;font-size:20px;padding:4px">−</button>
+        <span id="sqtyDisplay" style="font-family:'Cinzel',serif;font-size:18px;font-weight:700;min-width:32px;text-align:center;color:var(--parchment)">1</span>
+        <button class="quick-set-btn" data-step="sqty" data-dir="1"  data-min="1" style="width:40px;font-size:20px;padding:4px">+</button>
+        <input type="hidden" id="sqtyHidden" value="1">
+        <input class="form-input" id="fSunit" placeholder="paquets, litres…" autocomplete="off" style="flex:1">
+      </div>
+    </div>
     <div class="form-group"><label class="form-label">Zone (optionnel)</label>
       <select class="form-select" id="fZone">
         <option value="">— Choisir —</option>
@@ -1216,10 +1237,60 @@ function showAddManualShoppingModal() {
   </div>`);
   document.getElementById('mClose').addEventListener('click',closeModal);
   document.getElementById('mCancel').addEventListener('click',closeModal);
+  attachSteppers();
   document.getElementById('mSave').addEventListener('click',()=>{
     const name=document.getElementById('fName').value.trim(); if(!name)return;
-    state.shopping.push({id:uid(),name,zone:document.getElementById('fZone').value,subzone:'',source:'manual',checked:false,addedAt:new Date().toISOString()});
+    state.shopping.push({id:uid(),name,zone:document.getElementById('fZone').value,subzone:'',source:'manual',checked:false,addedAt:new Date().toISOString(),
+      sqty:parseInt(document.getElementById('sqtyHidden').value)||1,
+      sunit:document.getElementById('fSunit').value.trim()
+    });
     saveLocal(); scheduleSyncToGist(); closeModal(); render(); showToast(`"${name}" ajouté ✓`);
+  });
+}
+
+function showEditShoppingModal(itemId) {
+  const item=state.shopping.find(s=>s.id===itemId); if(!item) return;
+  openModal(`
+  <div class="modal-header"><div class="modal-title">✏ Modifier l'article</div><button class="modal-close" id="mClose">✕</button></div>
+  <div class="modal-body">
+    <div class="form-group"><label class="form-label">Article</label>
+      <input class="form-input" id="fName" value="${item.name}" autocomplete="off"></div>
+    <div class="form-group">
+      <label class="form-label">Quantité à acheter</label>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+        <button class="quick-set-btn" data-step="sqty" data-dir="-1" data-min="1" style="width:40px;font-size:20px;padding:4px">−</button>
+        <span id="sqtyDisplay" style="font-family:'Cinzel',serif;font-size:18px;font-weight:700;min-width:32px;text-align:center;color:var(--parchment)">${item.sqty||1}</span>
+        <button class="quick-set-btn" data-step="sqty" data-dir="1"  data-min="1" style="width:40px;font-size:20px;padding:4px">+</button>
+        <input type="hidden" id="sqtyHidden" value="${item.sqty||1}">
+        <input class="form-input" id="fSunit" value="${item.sunit||''}" placeholder="paquets, litres…" autocomplete="off" style="flex:1">
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Zone (optionnel)</label>
+      <select class="form-select" id="fZone">
+        <option value="">— Choisir —</option>
+        ${ZONES_CONFIG.map(z=>`<option value="${z.name}" ${item.zone===z.name?'selected':''}>${z.name}</option>`).join('')}
+      </select>
+    </div>
+  </div>
+  <div class="modal-footer" style="flex-wrap:wrap;gap:8px">
+    <button class="btn btn-danger btn-sm" id="mDelete" style="flex:0 0 auto">Supprimer</button>
+    <button class="btn btn-ghost" id="mCancel" style="flex:1">Annuler</button>
+    <button class="btn btn-primary" id="mSave" style="flex:2">Sauvegarder</button>
+  </div>`);
+  document.getElementById('mClose').addEventListener('click',closeModal);
+  document.getElementById('mCancel').addEventListener('click',closeModal);
+  attachSteppers();
+  document.getElementById('mDelete').addEventListener('click',()=>{
+    state.shopping=state.shopping.filter(s=>s.id!==itemId);
+    saveLocal(); scheduleSyncToGist(); closeModal(); render(); showToast('Article supprimé');
+  });
+  document.getElementById('mSave').addEventListener('click',()=>{
+    const name=document.getElementById('fName').value.trim(); if(!name)return;
+    item.name  = name;
+    item.sqty  = parseInt(document.getElementById('sqtyHidden').value)||1;
+    item.sunit = document.getElementById('fSunit').value.trim();
+    item.zone  = document.getElementById('fZone').value;
+    saveLocal(); scheduleSyncToGist(); closeModal(); render(); showToast('Article mis à jour ✓');
   });
 }
 
