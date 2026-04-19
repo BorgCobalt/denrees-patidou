@@ -463,6 +463,52 @@ html, body {
 .dlc-soon     { background: var(--low);       color: var(--low-text); }
 .dlc-expired  { background: var(--depleted-bg); color: var(--depleted-text); font-weight: bold; }
 
+/* ── SHOPPING DELETE BTN ── */
+.shopping-delete-btn {
+  background: none; border: none; color: var(--parchment-muted);
+  font-size: 15px; width: 30px; height: 30px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 4px; flex-shrink: 0; padding: 0;
+}
+.shopping-delete-btn:active { background: var(--depleted-bg); color: var(--depleted-text); }
+
+/* ── RECETTES ── */
+.recipe-day-card {
+  background: var(--bg-surface); border: 1px solid var(--gold-border);
+  border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px;
+  box-shadow: var(--shadow); cursor: pointer; transition: background 0.2s;
+}
+.recipe-day-card:active { background: var(--bg-hover); }
+.recipe-day-card.today {
+  border-color: var(--crimson); border-width: 2px;
+  background: #fdf6ec;
+}
+.recipe-day-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.recipe-day-name {
+  font-family: 'Cinzel', serif; font-size: 13px; font-weight: 700;
+  color: var(--parchment); letter-spacing: 0.04em;
+}
+.recipe-today-badge {
+  font-family: 'Crimson Text', serif; font-size: 11px; font-style: italic;
+  color: var(--crimson); background: #fce8e8; padding: 2px 8px;
+  border-radius: 10px;
+}
+.recipe-slot {
+  display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+  border-radius: var(--radius-sm); margin-bottom: 5px;
+  border: 1px dashed var(--gold-border); background: var(--bg-raised);
+}
+.recipe-slot.filled { border-style: solid; background: var(--bg-surface); }
+.recipe-slot-num {
+  font-family: 'Cinzel', serif; font-size: 10px; color: var(--gold-dim);
+  flex-shrink: 0; width: 14px; text-align: center;
+}
+.recipe-slot-text { flex: 1; font-family: 'Crimson Text', serif; font-size: 14px; color: var(--parchment); }
+.recipe-slot-empty { flex: 1; font-family: 'Crimson Text', serif; font-size: 13px; color: var(--parchment-muted); font-style: italic; }
+
 /* ── CRÉATURES AMBULANTES ── */
 .critter-walker {
   position: absolute; z-index: 50; pointer-events: none;
@@ -491,12 +537,15 @@ const ZONES_CONFIG = [
 // ═══════════════════════════════════════════════════════
 //  ÉTAT
 // ═══════════════════════════════════════════════════════
+const DAYS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+function defaultRecipes() { return Object.fromEntries(DAYS.map(d=>[d,['','']])); }
+
 let state = {
   view:'zones', tab:'stocks', zone:null, subzone:null,
-  items:[], shopping:[],
+  items:[], shopping:[], recipes: defaultRecipes(),
   settings:{token:'',gistId:''},
   syncStatus:'idle', lastSync:null,
-  sort: 'default', // 'default' | 'level_asc' | 'level_desc' | 'dlc'
+  sort: 'default',
 };
 
 // ═══════════════════════════════════════════════════════
@@ -505,10 +554,12 @@ let state = {
 function saveLocal() {
   localStorage.setItem('denrees_items',    JSON.stringify(state.items));
   localStorage.setItem('denrees_shopping', JSON.stringify(state.shopping));
+  localStorage.setItem('denrees_recipes',  JSON.stringify(state.recipes));
 }
 function loadLocal() {
   try { state.items    = JSON.parse(localStorage.getItem('denrees_items')    || '[]'); } catch(e){ state.items=[]; }
   try { state.shopping = JSON.parse(localStorage.getItem('denrees_shopping') || '[]'); } catch(e){ state.shopping=[]; }
+  try { state.recipes  = JSON.parse(localStorage.getItem('denrees_recipes')  || 'null') || defaultRecipes(); } catch(e){ state.recipes=defaultRecipes(); }
   try { state.settings = JSON.parse(localStorage.getItem('denrees_settings') || '{}'); } catch(e){ state.settings={}; }
   state.settings.token  = state.settings.token  || '';
   state.settings.gistId = state.settings.gistId || '';
@@ -534,6 +585,7 @@ async function syncFromGist() {
       const data = JSON.parse(file.content);
       state.items    = data.items    || [];
       state.shopping = data.shopping || [];
+      state.recipes  = data.recipes  || defaultRecipes();
       saveLocal();
     }
     state.syncStatus = 'ok';
@@ -548,7 +600,7 @@ async function syncToGist() {
   if (!state.settings.token || !state.settings.gistId) return false;
   try {
     state.syncStatus = 'syncing'; renderSyncBadge();
-    const data = { items:state.items, shopping:state.shopping };
+    const data = { items:state.items, shopping:state.shopping, recipes:state.recipes };
     const r = await fetch(`https://api.github.com/gists/${state.settings.gistId}`, {
       method:'PATCH',
       headers:{ 'Authorization':`token ${state.settings.token}`, 'Accept':'application/vnd.github.v3+json', 'Content-Type':'application/json' },
@@ -763,7 +815,8 @@ const app = document.getElementById('app');
 
 function render() {
   killCritters();
-  if (state.tab==='courses') { renderShoppingPage(); return; }
+  if (state.tab==='courses')  { renderShoppingPage(); return; }
+  if (state.tab==='recettes') { renderRecipesPage();  return; }
   if (state.view==='zones')    renderZonesPage();
   if (state.view==='subzones') renderSubzonesPage();
   if (state.view==='items')    renderItemsPage();
@@ -805,6 +858,9 @@ function buildShell(title) {
     <button class="nav-btn ${state.tab==='courses'?'active':''}" data-tab="courses">
       <span class="nav-icon">📜</span>
       <span>Courses${coursesBadge?' ('+coursesBadge+')':''}</span>
+    </button>
+    <button class="nav-btn ${state.tab==='recettes'?'active':''}" data-tab="recettes">
+      <span class="nav-icon">🍽️</span><span>Recettes</span>
     </button>
   </nav>`;
 }
@@ -958,6 +1014,69 @@ function renderItemsPage() {
   });
 }
 
+// ── RECETTES ──
+function renderRecipesPage() {
+  app.innerHTML = buildShell('Recettes de la Semaine');
+  attachShellEvents();
+  const c = document.getElementById('mainContent');
+  const todayIdx = (new Date().getDay() + 6) % 7; // 0=Lun … 6=Dim
+  c.innerHTML = `<div class="ornament">✦ ✧ ✦</div>`
+    + DAYS.map((day, i) => {
+      const r = state.recipes[day] || ['',''];
+      const isToday = i === todayIdx;
+      return `<div class="recipe-day-card ${isToday?'today':''}" data-day="${day}">
+        <div class="recipe-day-header">
+          <div class="recipe-day-name">${day}</div>
+          ${isToday ? `<span class="recipe-today-badge">Aujourd'hui</span>` : ''}
+        </div>
+        ${[0,1].map(n=>`<div class="recipe-slot ${r[n]?'filled':''}">
+          <span class="recipe-slot-num">${n+1}</span>
+          ${r[n]
+            ? `<span class="recipe-slot-text">${r[n]}</span>`
+            : `<span class="recipe-slot-empty">— Recette ${n+1} —</span>`}
+        </div>`).join('')}
+      </div>`;
+    }).join('')
+    + `<div class="ornament" style="margin-top:4px">⁂</div>`;
+  document.querySelectorAll('.recipe-day-card[data-day]').forEach(el=>{
+    el.addEventListener('click', ()=> showEditDayModal(el.dataset.day));
+  });
+}
+
+function showEditDayModal(day) {
+  const r = state.recipes[day] || ['',''];
+  openModal(`
+  <div class="modal-header"><div class="modal-title">🍽 ${day}</div><button class="modal-close" id="mClose">✕</button></div>
+  <div class="modal-body">
+    <div class="form-group">
+      <label class="form-label">Recette 1</label>
+      <input class="form-input" id="fR1" value="${r[0]}" placeholder="ex: Poulet rôti…" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Recette 2</label>
+      <input class="form-input" id="fR2" value="${r[1]}" placeholder="ex: Salade niçoise…" autocomplete="off">
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-ghost" id="mClear">Effacer le jour</button>
+    <button class="btn btn-primary" id="mSave">Enregistrer</button>
+  </div>`);
+  document.getElementById('mClose').addEventListener('click', closeModal);
+  document.getElementById('mClear').addEventListener('click', ()=>{
+    state.recipes[day]=['',''];
+    saveLocal(); scheduleSyncToGist(); closeModal(); renderRecipesPage();
+  });
+  document.getElementById('mSave').addEventListener('click', ()=>{
+    state.recipes[day]=[
+      document.getElementById('fR1').value.trim(),
+      document.getElementById('fR2').value.trim()
+    ];
+    saveLocal(); scheduleSyncToGist(); closeModal(); renderRecipesPage();
+    showToast(`${day} mis à jour ✦`);
+  });
+  setTimeout(()=>document.getElementById('fR1')?.focus(), 100);
+}
+
 // ── SHOPPING ──
 function renderShoppingPage() {
   app.innerHTML = buildShell('Parchemin des Manques');
@@ -972,14 +1091,15 @@ function renderShoppingPage() {
   if (!state.shopping.length) {
     html+=`<div class="shopping-empty"><span class="empty-icon">✨</span>Les étagères sont bien garnies !<br>Aucun manque à signaler.</div>`;
   } else {
-    const qtyLabel = item => (item.sqty && item.sqty > 1) ? `${item.sqty}${item.sunit?' '+item.sunit:''}` : (item.sunit||'');
+    const qtyTag = item => (item.sqty && item.sqty > 1) ? ` (${item.sqty}${item.sunit?' '+item.sunit:''})` : (item.sunit ? ` (${item.sunit})` : '');
     const renderItem=item=>`<div class="shopping-item ${item.checked?'checked':''}" data-sid="${item.id}">
       <div class="shopping-checkbox">${item.checked?'✓':''}</div>
       <div class="shopping-item-info">
-        <div class="shopping-item-name">${item.name}</div>
-        <div class="shopping-item-meta">${[item.zone, item.subzone?'› '+item.subzone:'', qtyLabel(item)].filter(Boolean).join(' ')}</div>
+        <div class="shopping-item-name">${item.name}<span style="color:var(--parchment-muted);font-weight:400">${qtyTag(item)}</span></div>
+        <div class="shopping-item-meta">${[item.zone, item.subzone?'› '+item.subzone:''].filter(Boolean).join(' ')}</div>
       </div>
       <span class="shopping-item-source ${item.source==='manual'?'manual':''}">${item.source==='depleted'?'épuisé':'manuel'}</span>
+      <button class="shopping-delete-btn" data-delete-sid="${item.id}">✕</button>
     </div>`;
     html += unchecked.map(renderItem).join('');
     if (checked.length) {
@@ -1000,6 +1120,12 @@ function renderShoppingPage() {
     el.addEventListener('touchend', e=>{ clearTimeout(pressTimer); if(longPressed){longPressed=false; e.preventDefault();} });
     el.addEventListener('touchmove', ()=>clearTimeout(pressTimer),{passive:true});
     el.addEventListener('click', ()=>{ if(longPressed) return; it.checked=!it.checked; saveLocal(); scheduleSyncToGist(); render(); });
+  });
+  document.querySelectorAll('.shopping-delete-btn[data-delete-sid]').forEach(btn=>{
+    btn.addEventListener('click', e=>{ e.stopPropagation();
+      state.shopping=state.shopping.filter(s=>s.id!==btn.dataset.deleteSid);
+      saveLocal(); scheduleSyncToGist(); render();
+    });
   });
   const clr=document.getElementById('clearChecked');
   if(clr) clr.addEventListener('click',()=>{ state.shopping=state.shopping.filter(s=>!s.checked); saveLocal(); scheduleSyncToGist(); render(); });
