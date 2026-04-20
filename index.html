@@ -843,6 +843,7 @@ function buildShell(title) {
       </div>
     </div>
     <div class="header-actions">
+      <button class="icon-btn" id="searchBtn">🔍</button>
       ${showSync?`<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
         <button class="icon-btn" id="syncBtn">⟳</button>
         <span class="sync-status ${state.syncStatus}">${{idle:'',syncing:'sync…',ok:'✓',error:'⚠'}[state.syncStatus]||''}</span>
@@ -882,6 +883,7 @@ function attachShellEvents() {
   const sb=document.getElementById('syncBtn');
   if(sb) sb.addEventListener('click',async()=>{ await syncFromGist(); render(); showToast('Grimoire synchronisé ✓'); });
   document.getElementById('settingsBtn').addEventListener('click',showSettingsModal);
+  document.getElementById('searchBtn').addEventListener('click', showSearchOverlay);
 }
 
 // ── ZONES ──
@@ -955,7 +957,8 @@ function sortedItems(items) {
     if (!b.dlc) return -1;
     return new Date(a.dlc) - new Date(b.dlc);
   });
-  return copy; // default
+  // Par défaut : ordre alphabétique
+  return copy.sort((a,b) => a.name.localeCompare(b.name, 'fr', {sensitivity:'base'}));
 }
 
 // ── ITEMS ──
@@ -1463,6 +1466,71 @@ function showSettingsModal() {
       else{showToast('Erreur de connexion ⚠'); btn.textContent='Enregistrer & Tester'; btn.disabled=false;}
     } catch(e){showToast('Erreur : '+e.message); btn.textContent='Enregistrer & Tester'; btn.disabled=false;}
   });
+}
+
+// ── RECHERCHE ──
+function showSearchOverlay() {
+  if (document.getElementById('searchOverlay')) return;
+  const overlay = document.createElement('div');
+  overlay.id = 'searchOverlay';
+  overlay.style.cssText = 'position:absolute;inset:0;z-index:90;background:var(--bg-base);display:flex;flex-direction:column;';
+  overlay.innerHTML = `
+    <div style="padding:12px 16px;border-bottom:2px solid var(--gold-border);background:var(--bg-deep);display:flex;gap:8px;align-items:center;flex-shrink:0">
+      <input id="searchInput" type="search" placeholder="Chercher une denrée…"
+        style="flex:1;background:var(--bg-surface);border:1px solid var(--gold-border);border-radius:var(--radius-sm);
+               padding:9px 12px;font-family:'Crimson Text',serif;font-size:16px;color:var(--parchment);outline:none;-webkit-appearance:none"
+        autocomplete="off" autocorrect="off" autocapitalize="off">
+      <button id="searchClose" class="icon-btn" style="flex-shrink:0">✕</button>
+    </div>
+    <div id="searchResults" style="flex:1;overflow-y:auto;padding:16px;"></div>`;
+  app.appendChild(overlay);
+
+  const input = overlay.querySelector('#searchInput');
+  const results = overlay.querySelector('#searchResults');
+
+  function renderResults() {
+    const q = input.value.trim().toLowerCase();
+    if (!q) {
+      results.innerHTML = `<div class="empty-state"><span class="icon">🔍</span>Tapez le nom d'une denrée…</div>`;
+      return;
+    }
+    const matches = state.items
+      .filter(i => i.name.toLowerCase().includes(q))
+      .sort((a,b) => a.name.localeCompare(b.name,'fr',{sensitivity:'base'}));
+    if (!matches.length) {
+      results.innerHTML = `<div class="empty-state"><span class="icon">🤷</span>Aucune denrée trouvée pour <em>"${q}"</em>.</div>`;
+      return;
+    }
+    results.innerHTML = matches.map(item => {
+      const s=getStatus(item), pct=getPercent(item);
+      return `<div class="item-card ${s==='depleted'?'depleted':''}" data-search-id="${item.id}" style="margin-bottom:8px;cursor:pointer">
+        <div class="item-card-top">
+          <div class="item-name">${item.name}</div>
+          <span class="item-status-badge ${statusBadgeClass(s)}">${statusLabel(s)}</span>
+        </div>
+        <div style="font-size:11px;color:var(--parchment-muted);margin:2px 0 6px;font-style:italic">${item.zone} › ${item.subzone}</div>
+        <div class="item-qty">${item.qty||0}${item.unit?' '+item.unit:''} dispo${item.inUse?' · '+item.inUse+' en cours':''}</div>
+        ${item.dlc ? dlcHTML(item.dlc) : ''}
+        <div class="item-bar-bg" style="margin-top:6px"><div class="item-bar-fill ${statusBarClass(s)}" style="width:${s==='depleted'?0:pct}%"></div></div>
+        <div class="item-bar-labels"><span>${pct}%</span>${item.alertThreshold?`<span>⚠ ${item.alertThreshold}%</span>`:''}</div>
+      </div>`;
+    }).join('');
+    results.querySelectorAll('.item-card[data-search-id]').forEach(el => {
+      el.addEventListener('click', () => {
+        closeSearch();
+        showEditItemModal(el.dataset.searchId);
+      });
+    });
+  }
+
+  overlay.querySelector('#searchClose').addEventListener('click', closeSearch);
+  input.addEventListener('input', renderResults);
+  renderResults();
+  setTimeout(() => input.focus(), 80);
+}
+
+function closeSearch() {
+  const o = document.getElementById('searchOverlay'); if(o) o.remove();
 }
 
 function showConfirm(title,msg,onConfirm) {
