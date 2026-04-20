@@ -583,7 +583,9 @@ async function syncFromGist() {
     const file = gist.files['denrees-patidou.json'];
     if (file) {
       const data = JSON.parse(file.content);
-      state.items    = data.items    || [];
+      // Préserve les alertSeen locaux déjà acquittés (évite que la synchro les réinitialise)
+      const seenIds = new Set(state.items.filter(i=>i.alertSeen).map(i=>i.id));
+      state.items    = (data.items || []).map(i => seenIds.has(i.id) ? {...i, alertSeen:true} : i);
       state.shopping = data.shopping || [];
       state.recipes  = data.recipes  || defaultRecipes();
       saveLocal();
@@ -1322,14 +1324,17 @@ function showEditItemModal(itemId) {
   });
   document.getElementById('mSave').addEventListener('click', () => {
     const name = document.getElementById('fName').value.trim(); if (!name) return;
+    const oldLevel = item.level ?? 100;
+    const oldQty   = parseInt(item.qty) || 0;
     item.name      = name;
-    item.alertSeen = false;
     item.subzone   = document.getElementById('fSubzone').value || item.subzone;
     item.qty     = parseInt(document.getElementById('qtyHidden').value)   || 0;
     item.inUse   = parseInt(document.getElementById('inUseHidden').value) || 0;
     item.unit    = document.getElementById('fUnit').value.trim();
     item.level = parseInt(document.getElementById('fLevel').value);
     item.alertThreshold = parseInt(document.getElementById('fThresh').value);
+    // Remet la notif seulement si la situation s'est aggravée (niveau baissé ou qty réduite)
+    if (item.level < oldLevel || item.qty < oldQty) item.alertSeen = false;
     if (isCuisine) item.dlc = document.getElementById('fDlc')?.value || '';
     delete item.maxQty;
     syncToShoppingList(item); removeFromShoppingIfRestocked(item);
