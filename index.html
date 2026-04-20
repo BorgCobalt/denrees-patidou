@@ -999,8 +999,8 @@ function renderItemsPage() {
         ${item.dlc ? dlcHTML(item.dlc) : ''}
         <div class="item-bar-bg"><div class="item-bar-fill ${statusBarClass(s)}" style="width:${s==='depleted'?0:(pct??100)}%"></div></div>
         <div class="item-bar-labels">
+          ${item.alertThreshold?`<span>⚠ ${item.alertThreshold}%</span>`:'<span></span>'}
           <span>${pct!==null?pct+'%':'—'}</span>
-          ${item.alertThreshold?`<span>⚠ ${item.alertThreshold}%</span>`:''}
         </div>
       </div>`;
     }).join('')}</div>`;
@@ -1517,7 +1517,7 @@ function showSearchOverlay() {
         <div class="item-qty">${item.qty||0}${item.unit?' '+item.unit:''} dispo${item.inUse?' · '+item.inUse+' en cours':''}</div>
         ${item.dlc ? dlcHTML(item.dlc) : ''}
         <div class="item-bar-bg" style="margin-top:6px"><div class="item-bar-fill ${statusBarClass(s)}" style="width:${s==='depleted'?0:pct}%"></div></div>
-        <div class="item-bar-labels"><span>${pct}%</span>${item.alertThreshold?`<span>⚠ ${item.alertThreshold}%</span>`:''}</div>
+        <div class="item-bar-labels">${item.alertThreshold?`<span>⚠ ${item.alertThreshold}%</span>`:'<span></span>'}<span>${pct}%</span></div>
       </div>`;
     }).join('');
     results.querySelectorAll('.item-card[data-search-id]').forEach(el => {
