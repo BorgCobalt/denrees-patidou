@@ -665,13 +665,15 @@ function healthColor(pct) {
   return 'var(--ok-bar)';
 }
 function syncToShoppingList(item) {
-  if (getStatus(item)==='depleted' && !state.shopping.find(s=>s.itemId===item.id))
-    state.shopping.push({id:uid(),itemId:item.id,name:item.name,zone:item.zone,subzone:item.subzone,source:'depleted',checked:false,addedAt:new Date().toISOString()});
+  const s = getStatus(item);
+  if ((s==='depleted'||s==='critical') && !state.shopping.find(sh=>sh.itemId===item.id))
+    state.shopping.push({id:uid(),itemId:item.id,name:item.name,zone:item.zone,subzone:item.subzone,source:s,checked:false,addedAt:new Date().toISOString()});
 }
 function removeFromShoppingIfRestocked(item) {
-  if (getStatus(item)!=='depleted') state.shopping=state.shopping.filter(s=>s.itemId!==item.id);
+  const s = getStatus(item);
+  if (s==='ok'||s==='low') state.shopping=state.shopping.filter(sh=>sh.itemId!==item.id);
 }
-function syncAllToShopping() { state.items.forEach(i=>{ if(i.qty<=0)syncToShoppingList(i); else removeFromShoppingIfRestocked(i); }); }
+function syncAllToShopping() { state.items.forEach(i=>{ const s=getStatus(i); if(s==='depleted'||s==='critical')syncToShoppingList(i); else removeFromShoppingIfRestocked(i); }); }
 function formatLastSync(iso) {
   if (!iso) return 'jamais';
   const d=new Date(iso), now=new Date(), diff=Math.floor((now-d)/1000);
@@ -1103,7 +1105,7 @@ function renderShoppingPage() {
         <div class="shopping-item-name">${item.name}<span style="color:var(--parchment-muted);font-weight:400">${qtyTag(item)}</span></div>
         <div class="shopping-item-meta">${[item.zone, item.subzone?'› '+item.subzone:''].filter(Boolean).join(' ')}</div>
       </div>
-      <span class="shopping-item-source ${item.source==='manual'?'manual':''}">${item.source==='depleted'?'épuisé':'manuel'}</span>
+      <span class="shopping-item-source ${item.source==='manual'?'manual':''}">${item.source==='depleted'?'épuisé':item.source==='critical'?'critique':'manuel'}</span>
       <button class="shopping-delete-btn" data-delete-sid="${item.id}">✕</button>
     </div>`;
     html += unchecked.map(renderItem).join('');
