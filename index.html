@@ -998,7 +998,7 @@ function renderItemsPage() {
         <div class="item-qty">
           ${item.qty||0}${item.unit?' '+item.unit:''} dispo${item.inUse?' · '+item.inUse+' en cours':''}
         </div>
-        ${item.dlc ? dlcHTML(item.dlc) : ''}
+        ${item.dlc ? dlcHTML(item.dlc, item.subzone==='Nourriture congélo') : ''}
         <div class="item-bar-bg"><div class="item-bar-fill ${statusBarClass(s)}" style="width:${s==='depleted'?0:(pct??100)}%"></div></div>
         <div class="item-bar-labels">
           ${item.alertThreshold?`<span>⚠ ${item.alertThreshold}%</span>`:'<span></span>'}
@@ -1179,13 +1179,19 @@ function attachSteppers() {
 }
 
 // DLC helpers
-function dlcHTML(dlcVal) {
+function dlcHTML(dlcVal, isCongelo=false) {
   if (!dlcVal) return '';
-  const d = new Date(dlcVal), now = new Date();
-  const days = Math.floor((d - now) / 86400000);
-  if (days < 0)  return `<span class="dlc-badge dlc-expired">⚠ Périmé depuis ${Math.abs(days)}j</span>`;
-  if (days <= 7) return `<span class="dlc-badge dlc-soon">⏳ DLC dans ${days}j — ${d.toLocaleDateString('fr-FR')}</span>`;
-  return `<span class="dlc-badge dlc-ok">📅 DLC : ${d.toLocaleDateString('fr-FR')}</span>`;
+  // Comparaison en minuit local pour éviter le décalage UTC/timezone
+  const [y,m,d] = dlcVal.split('-').map(Number);
+  const dlcDate = new Date(y, m-1, d);           // minuit heure locale
+  const today   = new Date(); today.setHours(0,0,0,0); // minuit aujourd'hui
+  const days = Math.round((dlcDate - today) / 86400000);
+  if (days < 0) {
+    if (isCongelo) return `<span class="dlc-badge dlc-ok">🧊 Congelé — DLC ${dlcDate.toLocaleDateString('fr-FR')}</span>`;
+    return `<span class="dlc-badge dlc-expired">⚠ Périmé depuis ${Math.abs(days)}j</span>`;
+  }
+  if (days <= 7) return `<span class="dlc-badge dlc-soon">⏳ DLC dans ${days}j — ${dlcDate.toLocaleDateString('fr-FR')}</span>`;
+  return `<span class="dlc-badge dlc-ok">📅 DLC : ${dlcDate.toLocaleDateString('fr-FR')}</span>`;
 }
 
 function dlcFieldHTML(val='') {
@@ -1517,7 +1523,7 @@ function showSearchOverlay() {
         </div>
         <div style="font-size:11px;color:var(--parchment-muted);margin:2px 0 6px;font-style:italic">${item.zone} › ${item.subzone}</div>
         <div class="item-qty">${item.qty||0}${item.unit?' '+item.unit:''} dispo${item.inUse?' · '+item.inUse+' en cours':''}</div>
-        ${item.dlc ? dlcHTML(item.dlc) : ''}
+        ${item.dlc ? dlcHTML(item.dlc, item.subzone==='Nourriture congélo') : ''}
         <div class="item-bar-bg" style="margin-top:6px"><div class="item-bar-fill ${statusBarClass(s)}" style="width:${s==='depleted'?0:pct}%"></div></div>
         <div class="item-bar-labels">${item.alertThreshold?`<span>⚠ ${item.alertThreshold}%</span>`:'<span></span>'}<span>${pct}%</span></div>
       </div>`;
